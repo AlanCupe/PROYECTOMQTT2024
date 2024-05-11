@@ -1,0 +1,48 @@
+.project-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .project-table th, .project-table td {
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .project-table th {
+    background-color: #004d40;
+    color: white;
+  }
+  
+  .status.pending {
+    color: orange;
+  }
+  
+  .status.completed {
+    color: green;
+  }
+  
+  .status.delayed {
+    color: red;
+  }
+  
+  .status.on-schedule {
+    color: blue;
+  }
+  
+  .user-image {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    margin-right: 4px;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    background-color: #ddd;
+  }
+  
+  .progress {
+    height: 10px;
+    background-color: green;
+  }
+  
