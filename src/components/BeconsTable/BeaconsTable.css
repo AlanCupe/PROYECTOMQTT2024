@@ -1,0 +1,10 @@
+.containerButton{
+    display: flex;
+        flex-direction: row;
+        column-gap: 10px;
+        justify-content: center;
+        img{
+            width: 30px;
+            cursor: pointer;
+        }
+}

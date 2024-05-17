@@ -1,12 +1,24 @@
 import { Router } from './RouterFrontend/Router';
-import { Mqttdata } from './components/Mqttdata/Mqttdata';
+
 import "./App.css"
+import { Mqttdata } from './components/Mqttdata/Mqttdata';
+import { BeaconProvider } from './Context/BeaconProvider';
+
 
 function App() {
 
     return (
+       <>
+       <BeaconProvider>
+       <Router/>
        
-           <Router/>
+       <Mqttdata/>
+       
+          
+       </BeaconProvider>
+ 
+       </>
+          
        
     );
 }

@@ -1,7 +1,8 @@
 .sidebar {
     width: 250px;
     height: 100vh;
-    background-color: #004d99;
+    background-image: url("/img/rect-light.svg");
+
     transition: width 0.3s;
     position: fixed;
     overflow: hidden;
@@ -16,18 +17,28 @@
     background: none;
     border: none;
     color: white;
-    padding: 10px;
+   
     font-size: 20px;
     cursor: pointer;
 }
 
-.search {
+.search-input {
     width: 90%;
     padding: 10px;
-    margin: 10px;
-    background: #003366;
+    margin: 10px auto;
+    background: #f5f5f500;
     border: none;
     color: white;
+    display: block;
+}
+
+.search-icon {
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    padding-left: 6px;
 }
 
 .menu-item {
@@ -37,18 +48,13 @@
     text-decoration: none;
     color: white;
     transition: all 0.3s;
-    
-    background-color: #003366
+  
+
+
 }
 
-.menu-item2 {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    text-decoration: none;
-    color: white;
-    transition: all 0.3s;
-  
+.menu-item.active {
+    background-color: #003366;
 }
 
 .menu-item:hover {
@@ -62,12 +68,37 @@
 .title {
     display: inline-block;
     overflow: hidden;
-    white-space: nowrap;
+    white-space: nowrap;.sidebar {
+    width: 50px; /* Ajustado para el estado oculto */
+    height: 100vh;
+    background-color: #004d99;
+    transition: width 0.3s;
+    position: fixed;
+    overflow: hidden;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra los iconos horizontalmente */
+    justify-content: center; /* Centra los iconos verticalmente */
+}
+
+.sidebar.open {
+    width: 250px; /* Ajustado para el estado expandido */
+}
+
+.img-icon {
+    margin: 10px 0; /* Espaciado vertical entre iconos */
+    cursor: pointer;
+}
+
+/* Estilos adicionales para cuando el sidebar está abierto */
+.sidebar.open .icons {
+    align-items: flex-start; /* Alinea los iconos a la izquierda cuando está abierto */
+    justify-content: flex-start; /* Alinea los iconos al inicio verticalmente */
+}
     text-overflow: ellipsis;
 }
-.img-icon{
-    width: 30px;
-}
+
 @media (max-width: 768px) {
     .sidebar.open {
         width: 100%;

@@ -1,0 +1,105 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'HindVadodara-Light', sans-serif;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+  
+th, td {
+    text-align: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+  
+th {
+    background: #17326d;
+    color: white;
+ 
+}
+  
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+  
+tr:hover {
+    background-color: #ddd;
+}
+  
+  /* Si tienes estados específicos como en ProjectTable, puedes agregarlos aquí */
+  .pending {
+    color: orange;
+    font-weight: bold;
+}
+  
+.completed {
+    color: green;
+    font-weight: bold;
+}
+  
+.delayed {
+    color: red;
+    font-weight: bold;
+}
+  
+.onschedule {
+    color: blue;
+    font-weight: bold;
+}
+
+
+
+.tituloTabla{
+    font-size:  1.5em;
+    font-family: 'HindVadodara-Bold';
+    padding-bottom: 20px;
+    color: #003D7A;
+    text-align: center;
+}
+.btnEditar{
+background-color: black;
+
+}
+
+
+.btnEditar, .btnEliminar{
+    padding: 10px 15px;
+    font-weight: bold;
+    
+ 
+    
+}
+
+   .tabla{
+    
+        width: 100%;
+        input{
+            padding: 8px;
+            border-radius: 10px;
+            border: none;
+            text-align: center;
+        }
+        input:focus{
+           outline: none;
+           thead{
+            border-radius:10px 0px 0px 10px;
+           }
+        }
+    
+    .containerButton{
+        display: flex;
+        flex-direction: row;
+        column-gap: 10px;
+        justify-content: center;
+        img{
+            width: 30px;
+            cursor: pointer;
+           
+        }
+        img:hover{
+            transform: scale(1.2,1.2);
+        }
+    }
+       
+    }

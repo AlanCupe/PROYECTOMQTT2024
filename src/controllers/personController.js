@@ -26,8 +26,20 @@ exports.getPersonById = async (req, res) => {
 
 exports.addPerson = async (req, res) => {
     const { Nombre, Apellido, Dni, Cargo, Empresa } = req.body;
+
     try {
         const pool = await dbConnection.connect();
+
+        // Primero, verificar si el DNI ya existe
+        const resultCheck = await pool.request()
+            .input('Dni', sql.NVarChar, Dni)
+            .query('SELECT * FROM Personas WHERE Dni = @Dni');
+
+        if (resultCheck.recordset.length > 0) {
+            return res.status(400).send({ message: 'El DNI ya está registrado.' });
+        }
+
+        // Si el DNI no existe, proceder a crear la nueva persona
         await pool.request()
             .input('Nombre', sql.NVarChar, Nombre)
             .input('Apellido', sql.NVarChar, Apellido)
@@ -35,6 +47,7 @@ exports.addPerson = async (req, res) => {
             .input('Cargo', sql.NVarChar, Cargo)
             .input('Empresa', sql.NVarChar, Empresa)
             .query('INSERT INTO Personas (Nombre, Apellido, Dni, Cargo, Empresa) VALUES (@Nombre, @Apellido, @Dni, @Cargo, @Empresa)');
+
         res.status(201).send({ message: 'Persona creada correctamente' });
     } catch (error) {
         console.error('Database error:', error);
@@ -64,14 +77,36 @@ exports.updatePerson = async (req, res) => {
 
 exports.deletePerson = async (req, res) => {
     const { id } = req.params;
+    const pool = await dbConnection.connect();
+    const transaction = pool.transaction();
+
     try {
-        const pool = await dbConnection.connect();
-        await pool.request()
+        await transaction.begin();
+
+        // Elimina todas las asignaciones de beacons relacionadas con la persona
+        await transaction.request()
+            .input('id', sql.Int, id)
+            .query('DELETE FROM AsignacionPersonasBeacons WHERE PersonaID = @id');
+
+        // Elimina todas las asignaciones de áreas relacionadas con la persona
+        await transaction.request()
+            .input('id', sql.Int, id)
+            .query('DELETE FROM AsignacionPersonasAreas WHERE PersonaID = @id');
+
+        // Finalmente elimina la persona
+        await transaction.request()
             .input('id', sql.Int, id)
             .query('DELETE FROM Personas WHERE PersonaID = @id');
+
+        await transaction.commit();
         res.status(204).send(); // No Content
     } catch (error) {
         console.error('Database error:', error);
+        if (transaction) {
+            await transaction.rollback();
+        }
         res.status(500).send('Error al eliminar persona');
+    } finally {
+        pool.close(); // Asegúrate de cerrar la conexión
     }
 };

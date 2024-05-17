@@ -11,12 +11,23 @@ const mqttRoutes = require('./src/routes/mqttRoutes');
 const personRoutes = require('./src/routes/personRoutes');
 const beaconRoutes = require('./src/routes/beaconRoutes');
 const assignBeacons = require('./src/routes/assignBeacons');
+const arearegister = require('./src/routes/areaRegister');
+const gatewayRegister = require('./src/routes/gatewayRegister');
+const asignacionGatewaysAreasRoutes = require('./src/routes/asignacionGatewaysAreasRoutes');
+const gatewayNoAsignado = require('./src/routes/gatewayNoAsignado');
+const gatewayRoutes = require('./src/routes/gatewayRoutes');
+
+
 
 app.use('/mqtt', mqttRoutes);
 app.use('/personas', personRoutes);
 app.use('/beacons', beaconRoutes);
 app.use('/assignbeacon', assignBeacons);
-
+app.use('/arearegister', arearegister);
+app.use('/gatewayregister', gatewayRegister);
+app.use('/asignaciongatewaysareas', asignacionGatewaysAreasRoutes);
+app.use('/unassigned', gatewayNoAsignado);
+app.use('/gateways', gatewayRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto http://localhost:${PORT}`);

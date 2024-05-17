@@ -1,0 +1,47 @@
+.container-panelControl{
+    padding: 10px;
+}
+
+.nav-control{
+    margin-top: 30px;
+    ul{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    
+        column-gap: 20px;
+        list-style: none;
+        
+        li{
+            
+            a{
+                display: block;
+                text-decoration: none;
+                color:rgb(7, 102, 190);
+                font-family: 'HindVadodara-Bold';
+                padding: 8px 10px;
+                text-align: center;
+                border-radius: 50px;
+                transition: all 300ms;
+                border: 2px solid rgb(0, 108, 170);
+            }
+            a:hover{
+                background-image: url("/img/circuit-board.svg");
+                color: aliceblue
+            }
+            .gold-border {
+                border: 2px solid gold;
+                border-radius: 50px;
+                padding: 0.5rem;
+            }
+        };
+    }
+    margin-bottom: 20px;
+    
+
+   
+}
+.nav-control ul li a.active {
+   background-image: url("/img/rect-light.svg");
+    color: aliceblue;
+}

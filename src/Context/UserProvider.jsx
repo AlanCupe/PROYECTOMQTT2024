@@ -4,40 +4,35 @@ export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
-    const [shouldUpdate, setShouldUpdate] = useState(false);
+    const [updateTrigger, setUpdateTrigger] = useState(false);  // Estado para disparar la actualización
 
+    // Efecto para cargar usuarios inicialmente y recargar cuando updateTrigger cambia
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/personas');
-                const data = await response.json();
-                setUsers(data);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-            }
+            const response = await fetch('http://localhost:3000/personas');
+            const data = await response.json();
+            setUsers(data);
         };
-    
-        fetchData();  // Carga inicial
-    }, [shouldUpdate]);  // Carga posterior a cambios
+        fetchData();
+    }, [updateTrigger]);  // Dependencia en updateTrigger
 
     const addUser = (user) => {
-        setUsers([...users, user]);
-        setShouldUpdate(true);  // Establece el trigger para recargar datos
+        setUsers(prevUsers => [...prevUsers, user]);
+        setUpdateTrigger(prev => !prev);  // Cambiar el estado para disparar la recarga
     };
+    // En UserProvider.js o el componente que maneja el contexto
 
-    const deleteUser = (id) => {
-        setUsers(users.filter(user => user.PersonaID !== id));
-        setShouldUpdate(true);
-    };
 
-    const updateUser = (id, updatedUser) => {
-        const updatedUsers = users.map(user => user.PersonaID === id ? updatedUser : user);
-        setUsers(updatedUsers);
-        setShouldUpdate(true);
-    };
+    const fetchUsers = async () => {
+        const response = await fetch('http://localhost:3000/personas');
+        const data = await response.json();
+        setUsers(data);
+    }
+// Asegúrate de proporcionar `fetchUsers` junto con `users` en el valor del contexto.
+
 
     return (
-        <UserContext.Provider value={{ users, addUser, deleteUser, updateUser, setShouldUpdate }}>
+        <UserContext.Provider value={{ users, addUser ,fetchUsers}}>
             {children}
         </UserContext.Provider>
     );
