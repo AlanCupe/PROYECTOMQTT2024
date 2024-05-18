@@ -4,7 +4,7 @@ export const EventosBeaconsContext = createContext();
 
 export const EventosBeaconsProvider = ({ children }) => {
     const [eventosBeacons, setEventosBeacons] = useState([]);
-    const [loading, setLoading] = useState(true); // Estado de carga
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchEventosBeacons = async () => {
@@ -12,10 +12,10 @@ export const EventosBeaconsProvider = ({ children }) => {
                 const response = await fetch('http://localhost:3000/eventosbeacons/eventos');
                 const data = await response.json();
                 setEventosBeacons(data);
-                setLoading(false); // Datos cargados
+                setLoading(false);
             } catch (error) {
                 console.error('Error al obtener los eventos:', error);
-                setLoading(false); // Error al cargar datos
+                setLoading(false);
             }
         };
 

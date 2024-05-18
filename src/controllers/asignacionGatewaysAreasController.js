@@ -106,3 +106,21 @@ exports.delete = async (req, res) => {
     res.status(500).send('Error al eliminar la asignación');
   }
 };
+
+
+exports.getAsignacionGatewaysAreas = async (req, res) => {
+  try {
+      const pool = await dbConnection.connect();
+      const result = await pool.request().query(`
+          SELECT g.GatewayID, g.MacAddress,  a.Nombre as AreaNombre 
+          FROM AsignacionGatewaysAreas aga
+          JOIN Gateway g ON aga.GatewayID = g.GatewayID
+          JOIN Areas a ON aga.AreaID = a.AreaID
+      `);
+      res.json(result.recordset);
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).send('Error al obtener las asignaciones de gateways a áreas');
+  }
+};
+

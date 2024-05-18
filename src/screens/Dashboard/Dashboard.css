@@ -2,8 +2,46 @@
    
         display: grid;
         grid-auto-rows: auto;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
         gap: 20px;
         padding: 20px;
     
 }
+
+.containerInfoTable {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+        text-align: center;
+    }
+    
+    .containerInfoTable h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+    }
+    
+    .containerInfoTable h3 {
+        margin: 10px 0;
+        font-size: 18px;
+        color: #666;
+    }
+    
+    .containerInfoTable p {
+        margin: 5px 0;
+        font-size: 16px;
+        color: #999;
+    }
+    
+    .containerImgTable{
+        img{
+                width: 50px;
+        }
+    }

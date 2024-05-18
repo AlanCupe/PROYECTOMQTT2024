@@ -10,9 +10,9 @@ const ProjectTable = ({ data }) => {
         <table className='project-table'>
             <thead>
                 <tr>
-                    <th>EventoID</th>
+                    {/* <th>EventoID</th> */}
                     <th>iBeaconID</th>
-                    <th>GatewayID</th>
+                    {/* <th>GatewayID</th> */}
                     <th>TipoEvento</th>
                     <th>Timestamp</th>
                 </tr>
@@ -20,9 +20,9 @@ const ProjectTable = ({ data }) => {
             <tbody>
                 {data.map(evento => (
                     <tr key={evento.EventoID}>
-                        <td>{evento.EventoID}</td>
+                        {/* <td>{evento.EventoID}</td> */}
                         <td>{evento.iBeaconID}</td>
-                        <td>{evento.GatewayID}</td>
+                        {/* <td>{evento.GatewayID}</td> */}
                         <td>{evento.TipoEvento}</td>
                         <td>{new Date(evento.Timestamp).toLocaleString()}</td>
                     </tr>
