@@ -9,17 +9,18 @@ dbConnection.connect()
         console.error('Error al conectar con la base de datos:', err);
     });
 
+const RSSI_THRESHOLD = -100; // Ajusta este valor según sea necesario
+const CHECK_INTERVAL = 5000; // Ajusta el intervalo a 5 segundos
+
 const handleMQTTMessage = async (req, res) => {
     const { topic, message } = req.body;
+    console.log('Mensaje MQTT recibido:', { topic, message });
 
-    console.log('Mensaje MQTT recibido:');
-    console.log('Tema:', topic);
-    console.log('Mensaje:', message);
-
-    const gatewayMac = topic.split('/')[2]; // Extraer la dirección MAC del gateway del tema
+    const gatewayMac = topic.split('/')[2];
+    const now = new Date();
 
     try {
-        const parsedMessage = JSON.parse(message); // Parsear el mensaje JSON
+        const parsedMessage = JSON.parse(message);
         console.log('Mensaje MQTT analizado:', parsedMessage);
 
         const detectedBeacons = new Set();
@@ -33,19 +34,17 @@ const handleMQTTMessage = async (req, res) => {
                     Timestamp: new Date(item.timestamp)
                 };
 
-                console.log('Datos del Gateway a insertar en la base de datos:', gatewayData);
-
                 const gatewayQuery = `IF NOT EXISTS (SELECT 1 FROM Gateway WHERE MacAddress = @MacAddress)
-                                        BEGIN
-                                            INSERT INTO Gateway (MacAddress, GatewayFree, GatewayLoad, Timestamp) 
-                                            VALUES (@MacAddress, @GatewayFree, @GatewayLoad, @Timestamp)
-                                        END
-                                        ELSE
-                                        BEGIN
-                                            UPDATE Gateway 
-                                            SET GatewayFree = @GatewayFree, GatewayLoad = @GatewayLoad, Timestamp = @Timestamp 
-                                            WHERE MacAddress = @MacAddress
-                                        END`;
+                                      BEGIN
+                                          INSERT INTO Gateway (MacAddress, GatewayFree, GatewayLoad, Timestamp) 
+                                          VALUES (@MacAddress, @GatewayFree, @GatewayLoad, @Timestamp)
+                                      END
+                                      ELSE
+                                      BEGIN
+                                          UPDATE Gateway 
+                                          SET GatewayFree = @GatewayFree, GatewayLoad = @GatewayLoad, Timestamp = @Timestamp 
+                                          WHERE MacAddress = @MacAddress
+                                      END`;
 
                 await dbConnection.request()
                     .input('MacAddress', sql.NVarChar(50), gatewayData.MacAddress)
@@ -53,8 +52,6 @@ const handleMQTTMessage = async (req, res) => {
                     .input('GatewayLoad', sql.Float, gatewayData.GatewayLoad)
                     .input('Timestamp', sql.DateTime, gatewayData.Timestamp)
                     .query(gatewayQuery);
-
-                console.log('Datos del Gateway insertados o actualizados en la base de datos correctamente');
 
             } else if (item.type === 'iBeacon') {
                 const iBeaconData = {
@@ -68,68 +65,72 @@ const handleMQTTMessage = async (req, res) => {
                     Timestamp: new Date(item.timestamp)
                 };
 
-                console.log('Datos del iBeacon a insertar en la base de datos:', iBeaconData);
+                if (iBeaconData.RSSI >= RSSI_THRESHOLD) {
+                    detectedBeacons.add(iBeaconData.MacAddress);
 
-                const iBeaconQuery = `IF NOT EXISTS (SELECT 1 FROM iBeacon WHERE MacAddress = @MacAddress)
-                                        BEGIN
-                                            INSERT INTO iBeacon (MacAddress, RSSI, iBeaconUuid, iBeaconMajor, iBeaconMinor, iBeaconTxPower, Battery, Timestamp) 
-                                            VALUES (@MacAddress, @RSSI, @iBeaconUuid, @iBeaconMajor, @iBeaconMinor, @iBeaconTxPower, @Battery, @Timestamp)
-                                        END
-                                        ELSE
-                                        BEGIN
-                                            UPDATE iBeacon 
-                                            SET RSSI = @RSSI, iBeaconUuid = @iBeaconUuid, iBeaconMajor = @iBeaconMajor, iBeaconMinor = @iBeaconMinor, 
-                                                iBeaconTxPower = @iBeaconTxPower, Battery = @Battery, Timestamp = @Timestamp 
-                                            WHERE MacAddress = @MacAddress
-                                        END`;
+                    const iBeaconQuery = `IF NOT EXISTS (SELECT 1 FROM iBeacon WHERE MacAddress = @MacAddress)
+                                          BEGIN
+                                              INSERT INTO iBeacon (MacAddress, RSSI, iBeaconUuid, iBeaconMajor, iBeaconMinor, iBeaconTxPower, Battery, Timestamp) 
+                                              VALUES (@MacAddress, @RSSI, @iBeaconUuid, @iBeaconMajor, @iBeaconMinor, @iBeaconTxPower, @Battery, @Timestamp)
+                                          END
+                                          ELSE
+                                          BEGIN
+                                              UPDATE iBeacon 
+                                              SET RSSI = @RSSI, iBeaconUuid = @iBeaconUuid, iBeaconMajor = @iBeaconMajor, iBeaconMinor = @iBeaconMinor, 
+                                                  iBeaconTxPower = @iBeaconTxPower, Battery = @Battery, Timestamp = @Timestamp 
+                                              WHERE MacAddress = @MacAddress
+                                          END`;
 
-                await dbConnection.request()
-                    .input('MacAddress', sql.NVarChar(50), iBeaconData.MacAddress)
-                    .input('RSSI', sql.Int, iBeaconData.RSSI)
-                    .input('iBeaconUuid', sql.NVarChar(50), iBeaconData.iBeaconUuid)
-                    .input('iBeaconMajor', sql.Int, iBeaconData.iBeaconMajor)
-                    .input('iBeaconMinor', sql.Int, iBeaconData.iBeaconMinor)
-                    .input('iBeaconTxPower', sql.Int, iBeaconData.iBeaconTxPower)
-                    .input('Battery', sql.Int, iBeaconData.Battery)
-                    .input('Timestamp', sql.DateTime, iBeaconData.Timestamp)
-                    .query(iBeaconQuery);
-
-                console.log('Datos del iBeacon insertados o actualizados en la base de datos correctamente');
-
-                detectedBeacons.add(iBeaconData.MacAddress);
-
-                const gatewayQuery = `SELECT GatewayID FROM Gateway WHERE MacAddress = @GatewayMac`;
-                const result = await dbConnection.request()
-                    .input('GatewayMac', sql.NVarChar(50), gatewayMac)
-                    .query(gatewayQuery);
-
-                if (result.recordset.length > 0) {
-                    const gatewayID = result.recordset[0].GatewayID;
-
-                    const lastEventQuery = `SELECT TOP 1 TipoEvento FROM EventosBeacons WHERE iBeaconID = (SELECT iBeaconID FROM iBeacon WHERE MacAddress = @MacAddress) AND GatewayID = @GatewayID ORDER BY Timestamp DESC`;
-                    const lastEventResult = await dbConnection.request()
+                    await dbConnection.request()
                         .input('MacAddress', sql.NVarChar(50), iBeaconData.MacAddress)
-                        .input('GatewayID', sql.Int, gatewayID)
-                        .query(lastEventQuery);
+                        .input('RSSI', sql.Int, iBeaconData.RSSI)
+                        .input('iBeaconUuid', sql.NVarChar(50), iBeaconData.iBeaconUuid)
+                        .input('iBeaconMajor', sql.Int, iBeaconData.iBeaconMajor)
+                        .input('iBeaconMinor', sql.Int, iBeaconData.iBeaconMinor)
+                        .input('iBeaconTxPower', sql.Int, iBeaconData.iBeaconTxPower)
+                        .input('Battery', sql.Int, iBeaconData.Battery)
+                        .input('Timestamp', sql.DateTime, iBeaconData.Timestamp)
+                        .query(iBeaconQuery);
 
-                    const lastEventType = lastEventResult.recordset.length > 0 ? lastEventResult.recordset[0].TipoEvento : null;
-                    const newEventType = 'Entrada';
+                    const gatewayQuery = `SELECT GatewayID FROM Gateway WHERE MacAddress = @GatewayMac`;
+                    const result = await dbConnection.request()
+                        .input('GatewayMac', sql.NVarChar(50), gatewayMac)
+                        .query(gatewayQuery);
 
-                    if (lastEventType !== newEventType) {
-                        const eventoQuery = `INSERT INTO EventosBeacons (iBeaconID, GatewayID, TipoEvento, Timestamp)
-                                             VALUES ((SELECT iBeaconID FROM iBeacon WHERE MacAddress = @MacAddress), @GatewayID, @TipoEvento, @Timestamp)`;
+                    if (result.recordset.length > 0) {
+                        const gatewayID = result.recordset[0].GatewayID;
 
-                        await dbConnection.request()
+                        // Obtener todos los eventos almacenados en la tabla EventosBeacons
+                        const allEventsQuery = `SELECT TipoEvento, Timestamp FROM EventosBeacons 
+                                                WHERE iBeaconID = (SELECT iBeaconID FROM iBeacon WHERE MacAddress = @MacAddress) 
+                                                  AND GatewayID = @GatewayID`;
+                        const allEventsResult = await dbConnection.request()
                             .input('MacAddress', sql.NVarChar(50), iBeaconData.MacAddress)
                             .input('GatewayID', sql.Int, gatewayID)
-                            .input('TipoEvento', sql.NVarChar(10), newEventType)
-                            .input('Timestamp', sql.DateTime, iBeaconData.Timestamp)
-                            .query(eventoQuery);
+                            .query(allEventsQuery);
 
-                        console.log('Evento del iBeacon registrado en la base de datos correctamente');
-                    } else {
-                        console.log('El tipo de evento no ha cambiado, no se registrará un nuevo evento');
+                        // Verificar si ya existe un evento de entrada registrado
+                        const newEventType = 'Entrada';
+                        const lastEvent = allEventsResult.recordset.length > 0 ? allEventsResult.recordset[allEventsResult.recordset.length - 1] : null;
+                        const lastEventType = lastEvent ? lastEvent.TipoEvento : null;
+                        const lastEventTimestamp = lastEvent ? new Date(lastEvent.Timestamp) : null;
+
+                        if (lastEventType !== newEventType && (!lastEventTimestamp || (now - lastEventTimestamp) > CHECK_INTERVAL)) {
+                            const eventoQuery = `INSERT INTO EventosBeacons (iBeaconID, GatewayID, TipoEvento, Timestamp)
+                                                 VALUES ((SELECT iBeaconID FROM iBeacon WHERE MacAddress = @MacAddress), @GatewayID, @TipoEvento, @Timestamp)`;
+
+                            await dbConnection.request()
+                                .input('MacAddress', sql.NVarChar(50), iBeaconData.MacAddress)
+                                .input('GatewayID', sql.Int, gatewayID)
+                                .input('TipoEvento', sql.NVarChar(10), newEventType)
+                                .input('Timestamp', sql.DateTime, iBeaconData.Timestamp)
+                                .query(eventoQuery);
+                        } else {
+                            console.log(`Evento de entrada ya registrado para el iBeacon con MacAddress: ${iBeaconData.MacAddress}`);
+                        }
                     }
+                } else {
+                    console.log(`El beacon con MacAddress: ${iBeaconData.MacAddress} tiene RSSI bajo el umbral y no se considera en rango.`);
                 }
             } else {
                 console.error('Tipo de dispositivo no reconocido');
@@ -144,25 +145,41 @@ const handleMQTTMessage = async (req, res) => {
 
         if (result.recordset.length > 0) {
             const gatewayID = result.recordset[0].GatewayID;
-
-            const beaconsQuery = `SELECT iBeaconID, MacAddress FROM iBeacon WHERE iBeaconID IN (
+            const beaconsQuery = `SELECT iBeaconID, MacAddress, Timestamp FROM iBeacon WHERE iBeaconID IN (
                                   SELECT iBeaconID FROM EventosBeacons WHERE GatewayID = @GatewayID AND TipoEvento = 'Entrada')`;
             const beaconsResult = await dbConnection.request()
                 .input('GatewayID', sql.Int, gatewayID)
                 .query(beaconsQuery);
 
             for (const row of beaconsResult.recordset) {
-                if (!detectedBeacons.has(row.MacAddress)) {
-                    const eventoQuery = `INSERT INTO EventosBeacons (iBeaconID, GatewayID, TipoEvento, Timestamp)
-                                         VALUES (@iBeaconID, @GatewayID, 'Salida', @Timestamp)`;
-
-                    await dbConnection.request()
+                if (!detectedBeacons.has(row.MacAddress) && (now - new Date(row.Timestamp)) > CHECK_INTERVAL) {
+                    const lastEventQuery = `SELECT TOP 1 TipoEvento, Timestamp FROM EventosBeacons 
+                                            WHERE iBeaconID = @iBeaconID 
+                                              AND GatewayID = @GatewayID 
+                                            ORDER BY Timestamp DESC`;
+                    const lastEventResult = await dbConnection.request()
                         .input('iBeaconID', sql.Int, row.iBeaconID)
                         .input('GatewayID', sql.Int, gatewayID)
-                        .input('Timestamp', sql.DateTime, new Date())
-                        .query(eventoQuery);
+                        .query(lastEventQuery);
 
-                    console.log(`Evento de salida registrado para el iBeacon con MacAddress: ${row.MacAddress}`);
+                    const lastEventType = lastEventResult.recordset.length > 0 ? lastEventResult.recordset[0].TipoEvento : null;
+                    const lastEventTimestamp = lastEventResult.recordset.length > 0 ? new Date(lastEventResult.recordset[0].Timestamp) : null;
+                    const newEventType = 'Salida';
+
+                    // Registrar evento solo si el estado ha cambiado y la diferencia de tiempo no es inferior al intervalo de verificación
+                    if (lastEventType !== newEventType && (!lastEventTimestamp || (now - lastEventTimestamp) > CHECK_INTERVAL)) {
+                        const eventoQuery = `INSERT INTO EventosBeacons (iBeaconID, GatewayID, TipoEvento, Timestamp)
+                                             VALUES (@iBeaconID, @GatewayID, @TipoEvento, @Timestamp)`;
+
+                        await dbConnection.request()
+                            .input('iBeaconID', sql.Int, row.iBeaconID)
+                            .input('GatewayID', sql.Int, gatewayID)
+                            .input('TipoEvento', sql.NVarChar(10), newEventType)
+                            .input('Timestamp', sql.DateTime, now)
+                            .query(eventoQuery);
+
+                        console.log(`Evento de salida registrado para el iBeacon con MacAddress: ${row.MacAddress}`);
+                    }
                 }
             }
         }

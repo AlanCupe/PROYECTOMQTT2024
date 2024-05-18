@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -16,8 +15,7 @@ const gatewayRegister = require('./src/routes/gatewayRegister');
 const asignacionGatewaysAreasRoutes = require('./src/routes/asignacionGatewaysAreasRoutes');
 const gatewayNoAsignado = require('./src/routes/gatewayNoAsignado');
 const gatewayRoutes = require('./src/routes/gatewayRoutes');
-
-
+const eventosBeaconsRoutes = require('./src/routes/eventosBeaconsRoutes');
 
 app.use('/mqtt', mqttRoutes);
 app.use('/personas', personRoutes);
@@ -28,6 +26,7 @@ app.use('/gatewayregister', gatewayRegister);
 app.use('/asignaciongatewaysareas', asignacionGatewaysAreasRoutes);
 app.use('/unassigned', gatewayNoAsignado);
 app.use('/gateways', gatewayRoutes);
+app.use('/eventosbeacons', eventosBeaconsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto http://localhost:${PORT}`);
