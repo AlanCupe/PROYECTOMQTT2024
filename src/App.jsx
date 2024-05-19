@@ -15,11 +15,11 @@ function App() {
        <BeaconProvider>
         <GatewayProvider>
             
+       <Mqttdata/>
         <Router/>
         </GatewayProvider>
       
        
-       <Mqttdata/>
        
           
        </BeaconProvider>

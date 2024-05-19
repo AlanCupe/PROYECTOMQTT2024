@@ -6,12 +6,21 @@ export const GatewayContext = createContext();
 export const GatewayProvider = ({ children }) => {
     const [gateways, setGateways] = useState([]);
     const [areas, setAreas] = useState([]);
-    const [asignaciones,setAsignaciones] = useState([]);
+    const [asignaciones, setAsignaciones] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchGateways();
-        fetchAreas();
-        fetchAsignaciones();
+        const fetchAllData = async () => {
+            try {
+                await Promise.all([fetchGateways(), fetchAreas(), fetchAsignaciones()]);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
+        fetchAllData();
     }, []);
 
     const fetchGateways = async () => {
@@ -38,13 +47,14 @@ export const GatewayProvider = ({ children }) => {
         await axios.delete(`http://localhost:3000/gatewayregister/${id}`);
         fetchGateways();
     };
+
     const fetchAsignaciones = async () => {
         const response = await axios.get('http://localhost:3000/asignaciongatewaysareas');
         setAsignaciones(response.data);
     };
 
     return (
-        <GatewayContext.Provider value={{ gateways, createGateway, updateGateway, deleteGateway,areas ,fetchAsignaciones, asignaciones,setAsignaciones}}>
+        <GatewayContext.Provider value={{ gateways, createGateway, updateGateway, deleteGateway, areas, fetchAsignaciones, asignaciones, setAsignaciones, loading, error }}>
             {children}
         </GatewayContext.Provider>
     );
