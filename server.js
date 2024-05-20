@@ -17,6 +17,7 @@ const gatewayNoAsignado = require('./src/routes/gatewayNoAsignado');
 const gatewayRoutes = require('./src/routes/gatewayRoutes');
 const eventosBeaconsRoutes = require('./src/routes/eventosBeaconsRoutes');
 const areaRoutes = require('./src/routes/areaRoutes'); // Nueva ruta para áreas
+const reportsGeneralRoutes = require('./src/routes/ReportesRoutes/reportePersonalRoutes');
 
 app.use('/mqtt', mqttRoutes);
 app.use('/personas', personRoutes);
@@ -30,6 +31,7 @@ app.use('/unassigned', gatewayNoAsignado);
 app.use('/gateways', gatewayRoutes);
 app.use('/eventosbeacons', eventosBeaconsRoutes);
 
+app.use('/report', reportsGeneralRoutes); // Nueva ruta para reportes
 
 
 app.listen(PORT, () => {

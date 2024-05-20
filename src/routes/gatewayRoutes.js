@@ -11,4 +11,5 @@ router.post('/', createGateway);
 router.put('/:id', updateGateway);
 router.delete('/:id', deleteGateway);
 
+
 module.exports = router;

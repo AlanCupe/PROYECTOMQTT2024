@@ -124,3 +124,57 @@ exports.getAsignacionGatewaysAreas = async (req, res) => {
   }
 };
 
+
+exports.getAsignacionGatewaysAreasDownload = async (req, res) => {
+  try {
+    const { macGateway, areaTrabajo, fechaAsignacion } = req.query;
+    const pool = await dbConnection.connect();
+    let query = `
+      SELECT 
+        a.id,
+        g.MacAddress AS macGateway,
+        ar.Nombre AS areaTrabajo,
+        a.Timestamp AS fechaAsignacion
+      FROM AsignacionGatewaysAreas a
+      JOIN Gateway g ON a.GatewayID = g.GatewayID
+      JOIN Areas ar ON a.AreaID = ar.AreaID
+      WHERE 1=1
+    `;
+
+    if (macGateway) {
+      query += ` AND g.MacAddress LIKE '%${macGateway}%'`;
+    }
+    if (areaTrabajo) {
+      query += ` AND ar.Nombre LIKE '%${areaTrabajo}%'`;
+    }
+    if (fechaAsignacion) {
+      query += ` AND a.Timestamp LIKE '%${fechaAsignacion}%'`;
+    }
+
+    const result = await pool.request().query(query);
+
+    const assignments = result.recordset.map(item => ({
+      'MAC Gateway': item.macGateway,
+      'Área de Trabajo': item.areaTrabajo,
+      'Fecha de Asignación': new Date(item.fechaAsignacion).toLocaleString()
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(assignments);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Area Assignments");
+
+    const filePath = path.join(__dirname, '../../FilteredAreaAssignmentsReport.xlsx');
+    XLSX.writeFile(workbook, filePath);
+
+    res.download(filePath, 'FilteredAreaAssignmentsReport.xlsx', (err) => {
+      if (err) {
+        console.error('Error al enviar el archivo:', err);
+      } else {
+        fs.unlinkSync(filePath); // Eliminar el archivo después de enviarlo
+      }
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).send('Error al generar el reporte');
+  }
+}

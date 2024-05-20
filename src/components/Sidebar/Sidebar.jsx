@@ -17,6 +17,10 @@ const Sidebar = ({ isOpen, toggle }) => {
                 <span className="icon">&#128200;</span>
                 <span className="title">Dashboard</span>
             </NavLink>
+            <NavLink to={'/reports'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>
+                <span className="icon">&#9881;</span>
+                <span className="title">Reports</span>
+            </NavLink>
             <NavLink to={'/panelcontrol/'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>
                 <span className="icon">&#128101;</span>
                 <span className="title">Control Panel</span>
