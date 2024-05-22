@@ -64,10 +64,15 @@ const AssignBeaconForm = memo(() => {
     
             if (response.ok) {
                 const newAssignment = await response.json();
-                console.log('New Assignment:', newAssignment); // Agregar log para depurar
+            
+    
+                // Verificar si la respuesta contiene el ID de la asignación
+                if (!newAssignment.AsignacionID) {
+                    throw new Error('AsignacionID no está presente en la respuesta');
+                }
+    
                 setAssignments(prevAssignments => [...prevAssignments, {
                     ...newAssignment,
-                    AsignacionID: newAssignment.AsignacionID,
                     PersonaName: `${persona.Nombre} ${persona.Apellido}`,
                     BeaconMac: beacon.MacAddress,
                     Timestamp: postData.Timestamp
@@ -89,8 +94,6 @@ const AssignBeaconForm = memo(() => {
         }
         setLoading(false);
     };
-    
-    
     
 
     const personOptions = people.map(person => ({

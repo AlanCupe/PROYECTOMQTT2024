@@ -100,19 +100,32 @@ exports.createAssignBeacon = async (req, res) => {
             INSERT INTO AsignacionPersonasBeacons (PersonaID, iBeaconID, Timestamp) 
             VALUES (@PersonaID, @iBeaconID, @Timestamp)
         `;
-        await pool.request()
+        const insertResult = await pool.request()
             .input('PersonaID', sql.Int, PersonaID)
             .input('iBeaconID', sql.Int, iBeaconID)
             .input('Timestamp', sql.DateTime, timestamp)
             .query(insertQuery);
 
-        res.json({ message: 'Beacon asignado correctamente' });
+        // Obtener el ID del nuevo registro insertado
+        const newAssignmentIDQuery = `
+            SELECT TOP 1 AsignacionID FROM AsignacionPersonasBeacons
+            WHERE PersonaID = @PersonaID AND iBeaconID = @iBeaconID
+            ORDER BY Timestamp DESC
+        `;
+        const newAssignmentIDResult = await pool.request()
+            .input('PersonaID', sql.Int, PersonaID)
+            .input('iBeaconID', sql.Int, iBeaconID)
+            .query(newAssignmentIDQuery);
+
+        const newAssignmentID = newAssignmentIDResult.recordset[0].AsignacionID;
+        res.json({ AsignacionID: newAssignmentID, message: 'Beacon asignado correctamente' });
         pool.close();
     } catch (error) {
         console.error('Database error:', error);
         res.status(500).send('Error al asignar beacon');
     }
 };
+
 
 exports.updateAssignBeacon = async (req, res) => {
     const { id } = req.params; // ID de la asignación que se está editando

@@ -27,7 +27,7 @@ const AssignBeaconTable = memo(() => {
     useEffect(() => {
         setFilteredData(assignments);
         setModalFilteredData(assignments);
-        console.log("asignaciones de tabla de asigna ***", assignments);
+        
     }, [assignments]);
 
     const handleEditClick = (assignment) => {
@@ -77,15 +77,14 @@ const AssignBeaconTable = memo(() => {
     };
 
     const handleDelete = async (id) => {
-        console.log("ID to delete:", id); // Agregar log para depurar
+        
         if (!id) {
-            console.error("Invalid ID:", id);
             Swal.fire('Error', 'ID de asignación no válido.', 'error');
             return;
         }
-    
+
         try {
-            console.log("Deleting assignment with ID:", id); // Agregar para depurar
+            console.log("Deleting assignment with ID:", id); 
             const response = await fetch(`http://localhost:3000/assignbeacon/${id}`, {
                 method: 'DELETE',
             });
@@ -102,9 +101,6 @@ const AssignBeaconTable = memo(() => {
             Swal.fire('Error', 'Failed to delete assignment.', 'error');
         }
     };
-    
-    
-    
 
     const handleFilterChange = (event) => {
         const { name, value } = event.target;
@@ -155,7 +151,7 @@ const AssignBeaconTable = memo(() => {
                 </thead>
                 <tbody>
                     {filteredData.map((assignment) => {
-                        console.log("Assignment ID:", assignment.AsignacionID); // Agregar log para depurar
+                
                         return (
                             <tr key={assignment.AsignacionID}>
                                 {editAssignmentId === assignment.AsignacionID ? (
