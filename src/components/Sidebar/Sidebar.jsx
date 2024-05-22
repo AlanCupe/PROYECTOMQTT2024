@@ -14,15 +14,15 @@ const Sidebar = ({ isOpen, toggle }) => {
                 <div className="search-icon" onClick={toggle}>&#128269;</div>  // Icono de lupa Unicode // Icono de lupa Unicode
             )}
             <NavLink to={'/dashboard'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>
-                <span className="icon">&#128200;</span>
+                <span className="icon"><img src='/img/dashboardIcon.png'/></span>
                 <span className="title">Dashboard</span>
             </NavLink>
-            <NavLink to={'/reports'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>
-                <span className="icon">&#9881;</span>
-                <span className="title">Reports</span>
+            <NavLink to={'/historial'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>
+                <span className="icon"><img src='/img/historialIcon.png'/></span>
+                <span className="title">Historial</span>
             </NavLink>
             <NavLink to={'/panelcontrol/'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>
-                <span className="icon">&#128101;</span>
+                <span className="icon"><img src='/img/controlPanel.png'/></span>
                 <span className="title">Control Panel</span>
             </NavLink>
             <NavLink to={'/beaconAsignation'} className={({ isActive }) => isActive ? "menu-item active" : "menu-item"}>

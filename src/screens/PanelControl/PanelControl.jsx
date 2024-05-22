@@ -18,7 +18,7 @@ export const PanelControl = memo(() => {
               to={"/panelcontrol/registrousers"}
               className={({ isActive }) => (isActive ? "active" : "inactive")}
             >
-              Registrar Personal
+              <img src="/img/usuarioCreate.png"/><span>Registrar Personal</span>
             </NavLink>
           </li>
           <li>
@@ -26,7 +26,8 @@ export const PanelControl = memo(() => {
               to={"/panelcontrol/registroibecons"}
               className={({ isActive }) => (isActive ? "active" : "inactive")}
             >
-              Registrar Beacon
+               <img src="/img/beacon.png"/><span> Registrar Beacon</span>
+             
             </NavLink>
           </li>
           <li>
@@ -34,7 +35,8 @@ export const PanelControl = memo(() => {
               to={"/panelcontrol/beaconasignation"}
               className={({ isActive }) => (isActive ? "active gold-border" : "inactive gold-border")}
             >
-              Asignación de Beacon
+              <img src="/img/asignaciones.png"/><span> Asignación de Beacon</span>
+             
             </NavLink>
           </li>
           <li>
@@ -42,7 +44,8 @@ export const PanelControl = memo(() => {
               to={"/panelcontrol/arearegister"}
               className={({ isActive }) => (isActive ? "active" : "inactive")}
             >
-              Registrar Area | Gateway
+               <img src="/img/gateway.png"/><span>  Registrar Area | Gateway</span>
+             
             </NavLink>
           </li>
           <li>
@@ -50,7 +53,8 @@ export const PanelControl = memo(() => {
               to={"/panelcontrol/areaasignation"}
               className={({ isActive }) => (isActive ? "active gold-border" : "inactive gold-border")}
             >
-              Asignación de Area de Trabajo
+               <img src="/img/area.png"/><span>Asignación de Area de Trabajo</span>
+              
             </NavLink>
           </li>
         </ul>

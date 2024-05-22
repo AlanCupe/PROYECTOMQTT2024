@@ -1,8 +1,6 @@
 const sql = require('mssql');
 const dbConnection = require('../config/dbconfig');
 
-
-
 exports.getAssignBeacon = async (req, res) => {
     try {
         const pool = await dbConnection.connect();
@@ -25,12 +23,45 @@ exports.getAssignBeacon = async (req, res) => {
     }
 };
 
+exports.getUnassignedPeopleAndBeacons = async (req, res) => {
+    try {
+        const pool = await dbConnection.connect();
+
+        const unassignedPeopleQuery = `
+            SELECT p.PersonaID, p.Nombre, p.Apellido
+            FROM Personas p
+            LEFT JOIN AsignacionPersonasBeacons apb ON p.PersonaID = apb.PersonaID
+            WHERE apb.PersonaID IS NULL
+        `;
+        
+        const unassignedBeaconsQuery = `
+            SELECT b.iBeaconID, b.MacAddress
+            FROM iBeacon b
+            LEFT JOIN AsignacionPersonasBeacons apb ON b.iBeaconID = apb.iBeaconID
+            WHERE apb.iBeaconID IS NULL
+        `;
+        
+        const [unassignedPeopleResult, unassignedBeaconsResult] = await Promise.all([
+            pool.request().query(unassignedPeopleQuery),
+            pool.request().query(unassignedBeaconsQuery)
+        ]);
+
+        res.json({
+            people: unassignedPeopleResult.recordset,
+            beacons: unassignedBeaconsResult.recordset
+        });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).send('Error al obtener personas y beacons no asignados');
+    }
+};
 
 exports.createAssignBeacon = async (req, res) => {
     const { PersonaID, iBeaconID, Timestamp } = req.body;
 
     try {
         const pool = await dbConnection.connect();
+
         // Verificar si el beacon ya está asignado a otra persona
         const checkBeaconQuery = `
             SELECT * FROM AsignacionPersonasBeacons
@@ -41,9 +72,9 @@ exports.createAssignBeacon = async (req, res) => {
             .query(checkBeaconQuery);
 
         if (checkBeaconResult.recordset.length > 0) {
-            // Si el beacon ya está asignado, enviar un error
             res.status(400).send('Este beacon ya está asignado a otra persona.');
-            return; // Detener la ejecución adicional
+            pool.close();
+            return;
         }
 
         // Verificar si la persona ya tiene un beacon asignado
@@ -56,34 +87,32 @@ exports.createAssignBeacon = async (req, res) => {
             .query(checkPersonQuery);
 
         if (checkPersonResult.recordset.length > 0) {
-            // Si la persona ya tiene un beacon asignado, enviar un error
             res.status(400).send('Esta persona ya tiene un beacon asignado.');
-            return; // Detener la ejecución adicional
+            pool.close();
+            return;
         }
+
+        // Asegurarnos de que el Timestamp está en el formato correcto
+        const timestamp = new Date(Timestamp);
 
         // Si no hay asignaciones previas, proceder con la inserción del nuevo registro
         const insertQuery = `
             INSERT INTO AsignacionPersonasBeacons (PersonaID, iBeaconID, Timestamp) 
-            OUTPUT INSERTED.*
             VALUES (@PersonaID, @iBeaconID, @Timestamp)
         `;
-        const insertResult = await pool.request()
+        await pool.request()
             .input('PersonaID', sql.Int, PersonaID)
             .input('iBeaconID', sql.Int, iBeaconID)
-            .input('Timestamp', sql.DateTime, new Date(Timestamp))
+            .input('Timestamp', sql.DateTime, timestamp)
             .query(insertQuery);
 
-        if (insertResult.recordset.length > 0) {
-            res.json(insertResult.recordset[0]); // Devolver el registro creado
-        } else {
-            throw new Error('No se pudo insertar la asignación');
-        }
+        res.json({ message: 'Beacon asignado correctamente' });
+        pool.close();
     } catch (error) {
         console.error('Database error:', error);
         res.status(500).send('Error al asignar beacon');
     }
 };
-
 
 exports.updateAssignBeacon = async (req, res) => {
     const { id } = req.params; // ID de la asignación que se está editando
@@ -131,8 +160,6 @@ exports.updateAssignBeacon = async (req, res) => {
     }
 };
 
-
-
 exports.deleteAssignBeacon = async (req, res) => {
     const { id } = req.params;
     try {
@@ -152,4 +179,3 @@ exports.deleteAssignBeacon = async (req, res) => {
         res.status(500).send('Error al eliminar la asignación');
     }
 };
-

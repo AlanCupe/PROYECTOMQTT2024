@@ -83,7 +83,7 @@ export const AreaAssignmentTable = memo(() => {
 
   return (
     <div>
-      <button onClick={() => setModalIsOpen(true)}>Ver y Descargar Reporte</button>
+      <button className="btn-filter" onClick={() => setModalIsOpen(true)}>Ver y Descargar Reporte</button>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -91,22 +91,13 @@ export const AreaAssignmentTable = memo(() => {
         className="modal"
         overlayClassName="overlay"
       >
+        <button className="close-button" onClick={() => setModalIsOpen(false)}>×</button>
         <h2>Filtrar Asignaciones</h2>
-        <button onClick={() => setModalIsOpen(false)}>Cerrar</button>
-        <div className="filters">
-          <label>
-            MAC Gateway:
-            <input type="text" name="macGateway" value={filters.macGateway} onChange={handleFilterChange} />
-          </label>
-          <label>
-            Área de Trabajo:
-            <input type="text" name="areaTrabajo" value={filters.areaTrabajo} onChange={handleFilterChange} />
-          </label>
-          <label>
-            Fecha de Asignación:
-            <input type="text" name="fechaAsignacion" value={filters.fechaAsignacion} onChange={handleFilterChange} />
-          </label>
-          <button onClick={applyFilters}>Aplicar Filtros</button>
+        <div className="filter-container">
+          <input type="text" name="macGateway" value={filters.macGateway} onChange={handleFilterChange}  className="filter-input" placeholder="MAC Gateway:"/>
+          <input type="text" name="areaTrabajo" value={filters.areaTrabajo} onChange={handleFilterChange}  className="filter-input" placeholder="  Área de Trabajo:"/>
+          <input type="text" name="fechaAsignacion" value={filters.fechaAsignacion} onChange={handleFilterChange} className="filter-input" placeholder="Fecha de Asignación:" />
+          <button className="filter-button" onClick={applyFilters}>Aplicar Filtros</button>
         </div>
         <div className="modal-content">
           <table>
@@ -128,7 +119,7 @@ export const AreaAssignmentTable = memo(() => {
             </tbody>
           </table>
         </div>
-        <button onClick={handleDownloadFilteredReport}>Descargar Reporte Filtrado</button>
+        <button className="download-button" onClick={handleDownloadFilteredReport}>Descargar Reporte Filtrado</button>
       </Modal>
       <table>
         <thead>

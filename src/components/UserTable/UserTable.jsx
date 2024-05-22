@@ -133,6 +133,7 @@ const UsersTable = memo(() => {
             setReportData(data);
             setModalIsOpen(true); // Abre el modal cuando se obtienen los datos
         } catch (error) {
+            setError('Error fetching report data');
             console.error('Error:', error);
         }
     };
@@ -146,29 +147,37 @@ const UsersTable = memo(() => {
     };
 
     const applyFilters = () => {
-        const filtered = reportData.filter(persona => {
-            return Object.keys(filters).every(key => 
-                persona[key].toLowerCase().includes(filters[key].toLowerCase())
+        const filtered = reportData.filter(user => {
+            return (
+                (!filters.Nombre || user.Nombre.includes(filters.Nombre)) &&
+                (!filters.Apellido || user.Apellido.includes(filters.Apellido)) &&
+                (!filters.Dni || user.Dni.includes(filters.Dni)) &&
+                (!filters.Cargo || user.Cargo.includes(filters.Cargo)) &&
+                (!filters.Empresa || user.Empresa.includes(filters.Empresa))
             );
         });
         setFilteredData(filtered);
     };
 
-    const handleDownload = () => {
+    const downloadExcel = () => {
         const worksheet = XLSX.utils.json_to_sheet(filteredData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Report");
-        XLSX.writeFile(workbook, "filtered_report.xlsx");
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+        XLSX.writeFile(workbook, 'report.xlsx');
     };
 
     return (
         <>
             <div style={{ color: 'red' }}>{error}</div>
-            <div className="filters">
-                <button onClick={fetchReportData}>Ver Reporte</button>
+            <div>
+            <h2 className="tituloTabla">PERSONAL REGISTRADO</h2>
             </div>
+            <div className="filters">
+                <button className='btn-filter' onClick={fetchReportData}>Filtrar y Descargar</button>
+            </div>
+            
             <table className="tabla">
-                <caption className="tituloTabla">PERSONAL REGISTRADO</caption>
+               
                 <thead>
                     <tr>
                         <th>Nombre</th>
@@ -222,32 +231,17 @@ const UsersTable = memo(() => {
                 className="modal"
                 overlayClassName="overlay"
             >
-                <h2>Vista previa del reporte</h2>
-                <button onClick={() => setModalIsOpen(false)}>Cerrar</button>
-                <div className="filters">
-                    <label>
-                        Nombre:
-                        <input type="text" name="Nombre" value={filters.Nombre} onChange={handleFilterChange} />
-                    </label>
-                    <label>
-                        Apellido:
-                        <input type="text" name="Apellido" value={filters.Apellido} onChange={handleFilterChange} />
-                    </label>
-                    <label>
-                        Documento:
-                        <input type="text" name="Dni" value={filters.Dni} onChange={handleFilterChange} />
-                    </label>
-                    <label>
-                        Puesto:
-                        <input type="text" name="Cargo" value={filters.Cargo} onChange={handleFilterChange} />
-                    </label>
-                    <label>
-                        Empresa:
-                        <input type="text" name="Empresa" value={filters.Empresa} onChange={handleFilterChange} />
-                    </label>
-                    <button onClick={applyFilters}>Aplicar Filtros</button>
+                <button onClick={() => setModalIsOpen(false)} className="close-button">×</button>
+                <h2 className='tituloTabla'>Vista previa del reporte</h2>
+                <div className="filter-container">
+                    <input type="text" name="Nombre" placeholder="Nombre" value={filters.Nombre} onChange={handleFilterChange} className='filter-input'/>
+                    <input type="text" name="Apellido" placeholder="Apellido" value={filters.Apellido} onChange={handleFilterChange} className='filter-input'/>
+                    <input type="text" name="Dni" placeholder="Documento" value={filters.Dni} onChange={handleFilterChange} className='filter-input'/>
+                    <input type="text" name="Cargo" placeholder="Puesto" value={filters.Cargo} onChange={handleFilterChange} className='filter-input'/>
+                    <input type="text" name="Empresa" placeholder="Empresa" value={filters.Empresa} onChange={handleFilterChange} className='filter-input'/>
+                    <button onClick={applyFilters} className="btn btn-primary filter-button">Aplicar Filtros</button>
                 </div>
-                <button onClick={handleDownload}>Descargar en Excel</button>
+                <button onClick={downloadExcel} className="btn btn-success download-button">Descargar en Excel</button>
                 <div className="modal-content">
                     <table className="tabla">
                         <thead>

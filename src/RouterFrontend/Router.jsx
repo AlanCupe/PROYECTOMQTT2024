@@ -13,7 +13,7 @@ import Error from '../screens/Error';
 import { RegistroBecons } from '../screens/PanelControl/outlet/RegistroBecons';
 import { AreaAssignment_Gateway } from '../screens/PanelControl/outlet/AreaAssignment_Gateway/AreaAssignment_Gateway';
 import { AreaRegister } from '../screens/PanelControl/outlet/AreaRegister/AreaRegister';
-import { Reports } from '../screens/Reports/Reports';
+import Historial from '../screens/Historial/Historial';
 
 
 export const Router = () => {
@@ -23,11 +23,11 @@ export const Router = () => {
         <BrowserRouter>
             <UserProvider>
             <Sidebar isOpen={isSidebarOpen} toggle={() => setSidebarOpen(!isSidebarOpen)}/>
-            <div className='main' style={{ marginLeft: isSidebarOpen ? '250px' : '50px' }}>
+            <div className='main' style={{ marginLeft: isSidebarOpen ? '180px' : '80px' }}>
                 <Routes>
                     <Route path="/" element={<Navigate to={'/dashboard'}/>}  />
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/historial" element={<Historial />} />
                     <Route path="/panelcontrol/*" element={<PanelControl />}>
                         <Route path=''  element={<Navigate to={'registrousers'}/>} />
                         <Route path="registrousers"  element={<RegistroUsers />} />

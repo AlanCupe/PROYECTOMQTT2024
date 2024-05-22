@@ -44,11 +44,11 @@ export const Dashboard = () => {
                     <div key={gateway.GatewayID}>
                         <div className='containerInfoTable'>
                             <div className='containerImgTable'>
-                                <img src='/img/viewIcon.svg' alt='View Icon'/>
+                               
                             </div>
-                            <h2>{gateway.MacAddress}</h2>
-                            <h3>Área: {areaNombre}</h3>
-                            <p>Total de beacons únicos detectados: {totalEvents.length}</p>
+                            <h2 className='flexRow containerData'><img className='imgRouter' src="/img/gateway.png" alt="gateway" /><span>{gateway.MacAddress}</span> </h2>
+                            <h3> {areaNombre}</h3>
+                            <p className='flexRow imgP'><img src="/img/user.png" alt="usuarioDetectados" /> <span> {totalEvents.length}</span></p>
                         </div>
                         <div className='table-container'>
                             {totalEvents.length > 0 ? (

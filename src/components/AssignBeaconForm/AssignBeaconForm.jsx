@@ -13,70 +13,61 @@ const AssignBeaconForm = memo(() => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        const fetchPeopleAndBeacons = async () => {
-            setLoading(true);
-            setError('');
-            try {
-                const [peopleResponse, beaconsResponse] = await Promise.all([
-                    fetch('http://localhost:3000/personas'),
-                    fetch('http://localhost:3000/beacons')
-                ]);
-
-                if (peopleResponse.ok && beaconsResponse.ok) {
-                    const peopleData = await peopleResponse.json();
-                    const beaconsData = await beaconsResponse.json();
-
-                    const assignedPersonIds = new Set(assignments.map(a => a.PersonaID));
-                    const assignedBeaconIds = new Set(assignments.map(a => a.iBeaconID));
-
-                    const unassignedPeople = peopleData.filter(person => !assignedPersonIds.has(person.PersonaID));
-                    const unassignedBeacons = beaconsData.filter(beacon => !assignedBeaconIds.has(beacon.iBeaconID));
-
-                    setPeople(unassignedPeople);
-                    setBeacons(unassignedBeacons);
-                } else {
-                    throw new Error('Failed to fetch');
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setError('Failed to fetch data from server.');
+    const fetchPeopleAndBeacons = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const response = await fetch('http://localhost:3000/assignbeacon/unassigned');
+            if (response.ok) {
+                const data = await response.json();
+                setPeople(data.people);
+                setBeacons(data.beacons);
+            } else {
+                throw new Error('Failed to fetch');
             }
-            setLoading(false);
-        };
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setError('Failed to fetch data from server.');
+        }
+        setLoading(false);
+    };
 
+    useEffect(() => {
         fetchPeopleAndBeacons();
     }, [assignments]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
+    
         if (!selectedPerson || !selectedBeacon) {
             Swal.fire('Error', 'Persona o Beacon no seleccionado.', 'error');
             return;
         }
-
+    
         const persona = people.find(p => p.PersonaID === selectedPerson.value);
         const beacon = beacons.find(b => b.iBeaconID === selectedBeacon.value);
-
+    
         const postData = {
             PersonaID: persona.PersonaID,
             iBeaconID: beacon.iBeaconID,
             Timestamp: new Date().toISOString()
         };
-
+    
         setLoading(true);
         try {
+            console.log('Sending data to server:', postData);
             const response = await fetch('http://localhost:3000/assignbeacon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postData)
             });
-
+    
             if (response.ok) {
                 const newAssignment = await response.json();
+                console.log('New Assignment:', newAssignment); // Agregar log para depurar
                 setAssignments(prevAssignments => [...prevAssignments, {
                     ...newAssignment,
+                    AsignacionID: newAssignment.AsignacionID,
                     PersonaName: `${persona.Nombre} ${persona.Apellido}`,
                     BeaconMac: beacon.MacAddress,
                     Timestamp: postData.Timestamp
@@ -84,8 +75,13 @@ const AssignBeaconForm = memo(() => {
                 Swal.fire('Éxito', 'Beacon asignado correctamente', 'success');
                 setSelectedPerson(null);
                 setSelectedBeacon(null);
+    
+                // Refrescar listas de personas y beacons no asignados
+                fetchPeopleAndBeacons();
             } else {
-                throw new Error('Failed to post data');
+                const errorData = await response.text();
+                console.error('Failed to post data:', errorData);
+                throw new Error(errorData);
             }
         } catch (error) {
             console.error('Error posting data:', error);
@@ -93,6 +89,9 @@ const AssignBeaconForm = memo(() => {
         }
         setLoading(false);
     };
+    
+    
+    
 
     const personOptions = people.map(person => ({
         value: person.PersonaID,

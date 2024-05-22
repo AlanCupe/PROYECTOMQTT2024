@@ -102,7 +102,7 @@ export const BeaconsTable = memo(() => {
         <div>
             <div>
                 <h2 className='tituloTabla'>BEACONS REGISTRADOS</h2>
-                <button onClick={() => setModalIsOpen(true)}>Filtrar y Descargar</button>
+                <button className='btn-filter' onClick={() => setModalIsOpen(true)}>Filtrar y Descargar</button>
             </div>
             <table className='tabla'>
                 <thead>
@@ -129,8 +129,16 @@ export const BeaconsTable = memo(() => {
                                     <td>{beacon.MacAddress}</td>
                                     <td>
                                         <div className='containerButton'>
-                                            <img onClick={() => handleEditClick(beacon)} src='/img/edit.png' alt="Editar" />
-                                            <img onClick={() => handleDelete(beacon.iBeaconID)} src='/img/delete.png' alt="Eliminar" />
+                                            <img
+                                                onClick={() => handleEditClick(beacon)}
+                                                src='/img/edit.png'
+                                                alt="Editar"
+                                            />
+                                            <img
+                                                onClick={() => handleDelete(beacon.iBeaconID)}
+                                                src='/img/delete.png'
+                                                alt="Eliminar"
+                                            />
                                         </div>
                                     </td>
                                 </>
@@ -146,16 +154,13 @@ export const BeaconsTable = memo(() => {
                 className="modal"
                 overlayClassName="overlay"
             >
-                <h2>Filtrar Beacons</h2>
-                <button onClick={() => setModalIsOpen(false)}>Cerrar</button>
-                <div className="filters">
-                    <label>
-                        MAC Address:
-                        <input type="text" name="MacAddress" value={filters.MacAddress} onChange={handleFilterChange} />
-                    </label>
-                    <button onClick={applyFilters}>Aplicar Filtros</button>
+                <button className="close-button" onClick={() => setModalIsOpen(false)}>x</button>
+                <h2 className='tituloTabla'>Filtrar Beacons</h2>
+                <div className="filter-container">
+                    <input type="text" className='filter-input' name="MacAddress" value={filters.MacAddress} onChange={handleFilterChange} placeholder='  MAC Address:' />
+                    <button className='filter-button' onClick={applyFilters}>Aplicar Filtros</button>
                 </div>
-                <button onClick={handleDownload}>Descargar en Excel</button>
+                <button onClick={handleDownload} className='download-button'>Descargar en Excel</button>
                 <div className="modal-content">
                     <table className="tabla">
                         <thead>

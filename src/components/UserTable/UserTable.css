@@ -1,3 +1,4 @@
+/* Estilos generales de la tabla */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -6,69 +7,80 @@ table {
     overflow: hidden;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
-  
+
 th, td {
     text-align: center;
     padding: 12px;
     border-bottom: 1px solid #ddd;
 }
-  
+
 th {
     background: #17326d;
     color: white;
- 
+    font-weight: bold;
 }
-  
+
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
-  
+
 tr:hover {
     background-color: #ddd;
 }
-  
-  /* Si tienes estados específicos como en ProjectTable, puedes agregarlos aquí */
-  .pending {
+
+/* Estados específicos */
+.pending {
     color: orange;
     font-weight: bold;
 }
-  
+
 .completed {
     color: green;
     font-weight: bold;
 }
-  
+
 .delayed {
     color: red;
     font-weight: bold;
 }
-  
+
 .onschedule {
     color: blue;
     font-weight: bold;
 }
 
-
-
-.tituloTabla{
-    font-size:  1.5em;
+/* Título de la tabla */
+.tituloTabla {
+    font-size: 1.5em;
     font-family: 'HindVadodara-Bold';
     padding-bottom: 20px;
     color: #003D7A;
     text-align: center;
 }
-.btnEditar{
-background-color: black;
 
-}
-
-
-.btnEditar, .btnEliminar{
+/* Botones */
+.btnEditar, .btnEliminar {
     padding: 10px 15px;
     font-weight: bold;
-    
- 
-    
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btnEditar {
+    background-color: #007bff;
+    color: white;
+}
+
+.btnEditar:hover {
+    background-color: #0056b3;
+}
+
+.btnEliminar {
+    background-color: #6c757d;
+    color: white;
 }
 
    .tabla{
@@ -147,10 +159,6 @@ background-color: black;
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
-}
-
-.filters label {
-    margin-bottom: 10px;
 }
 
 .filters input {
@@ -251,4 +259,18 @@ tr:hover {
             transform: scale(1.2, 1.2);
         }
     }
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: red;
 }

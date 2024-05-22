@@ -10,7 +10,7 @@ dbConnection.connect()
     });
 
 const RSSI_THRESHOLD = -100; // Ajusta este valor según sea necesario
-const CHECK_INTERVAL = 5000; // Ajusta el intervalo a 5 segundos
+const CHECK_INTERVAL = 17000; // Ajusta el intervalo a 5 segundos
 
 const handleMQTTMessage = async (req, res) => {
     const { topic, message } = req.body;

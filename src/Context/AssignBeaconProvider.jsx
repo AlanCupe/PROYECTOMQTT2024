@@ -30,10 +30,10 @@ const AssignBeaconProvider = ({ children }) => {
     }, []);
 
     return (
-        <AssignBeaconContext.Provider value={{ assignments, loading, error,setAssignments }}>
+        <AssignBeaconContext.Provider value={{ assignments, loading, error, setAssignments }}>
             {children}
         </AssignBeaconContext.Provider>
     );
-}
+};
 
 export default AssignBeaconProvider;

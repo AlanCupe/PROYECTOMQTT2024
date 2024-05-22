@@ -5,7 +5,7 @@ import Modal from 'react-modal';
 import * as XLSX from 'xlsx';
 import "./AssignBeaconTable.css";
 
-Modal.setAppElement('#root'); // Asegúrate de que el id coincida con el id del elemento root en tu index.html
+Modal.setAppElement('#root');
 
 const AssignBeaconTable = memo(() => {
     const { assignments, loading, error, setAssignments } = useContext(AssignBeaconContext);
@@ -27,6 +27,7 @@ const AssignBeaconTable = memo(() => {
     useEffect(() => {
         setFilteredData(assignments);
         setModalFilteredData(assignments);
+        console.log("asignaciones de tabla de asigna ***", assignments);
     }, [assignments]);
 
     const handleEditClick = (assignment) => {
@@ -76,7 +77,15 @@ const AssignBeaconTable = memo(() => {
     };
 
     const handleDelete = async (id) => {
+        console.log("ID to delete:", id); // Agregar log para depurar
+        if (!id) {
+            console.error("Invalid ID:", id);
+            Swal.fire('Error', 'ID de asignación no válido.', 'error');
+            return;
+        }
+    
         try {
+            console.log("Deleting assignment with ID:", id); // Agregar para depurar
             const response = await fetch(`http://localhost:3000/assignbeacon/${id}`, {
                 method: 'DELETE',
             });
@@ -84,13 +93,18 @@ const AssignBeaconTable = memo(() => {
                 setAssignments(prev => prev.filter(assignment => assignment.AsignacionID !== id));
                 Swal.fire('Deleted!', 'Your assignment has been deleted.', 'success');
             } else {
-                throw new Error('Failed to delete assignment');
+                const errorData = await response.text();
+                console.error('Failed to delete assignment:', errorData);
+                throw new Error(errorData);
             }
         } catch (error) {
             console.error('Error deleting assignment:', error);
             Swal.fire('Error', 'Failed to delete assignment.', 'error');
         }
     };
+    
+    
+    
 
     const handleFilterChange = (event) => {
         const { name, value } = event.target;
@@ -113,7 +127,7 @@ const AssignBeaconTable = memo(() => {
         const worksheet = XLSX.utils.json_to_sheet(modalFilteredData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Assignments");
-        XLSX.writeFile(workbook, "ReporteAsignaciones.xlsx");
+        XLSX.writeFile(workbook, "Filtered_Assignments.xlsx");
     };
 
     const formatLocalDateTime = (dateTime) => {
@@ -128,7 +142,7 @@ const AssignBeaconTable = memo(() => {
         <div>
             <h2 className='tituloTabla'>ASIGNACIONES</h2>
             <div>
-                <button onClick={() => setModalIsOpen(true)}>Filtrar y Descargar</button>
+                <button className='btn-filter' onClick={() => setModalIsOpen(true)}>Filtrar y Descargar</button>
             </div>
             <table className='tabla'>
                 <thead>
@@ -140,35 +154,38 @@ const AssignBeaconTable = memo(() => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredData.map((assignment) => (
-                        <tr key={assignment.AsignacionID}>
-                            {editAssignmentId === assignment.AsignacionID ? (
-                                <>
-                                    <td><input type="text" name="PersonaName" value={editFormData.PersonaName} onChange={handleFormChange} /></td>
-                                    <td><input type="text" name="BeaconMac" value={editFormData.BeaconMac} onChange={handleFormChange} /></td>
-                                    <td><input type="datetime-local" name="Timestamp" value={editFormData.Timestamp} onChange={handleFormChange} /></td>
-                                    <td>
-                                        <div className='containerButton'>
-                                            <img onClick={handleSave} src='/img/save.png' alt="Guardar" />
-                                            <img onClick={handleCancel} src='/img/cancelled.png' alt="Cancelar" />
-                                        </div>
-                                    </td>
-                                </>
-                            ) : (
-                                <>
-                                    <td>{assignment.PersonaName}</td>
-                                    <td>{assignment.BeaconMac}</td>
-                                    <td>{formatLocalDateTime(assignment.Timestamp)}</td>
-                                    <td>
-                                        <div className='containerButton'>
-                                            <img onClick={() => handleEditClick(assignment)} src='/img/edit.png' alt="Editar" />
-                                            <img onClick={() => handleDelete(assignment.AsignacionID)} src='/img/delete.png' alt="Eliminar" />
-                                        </div>
-                                    </td>
-                                </>
-                            )}
-                        </tr>
-                    ))}
+                    {filteredData.map((assignment) => {
+                        console.log("Assignment ID:", assignment.AsignacionID); // Agregar log para depurar
+                        return (
+                            <tr key={assignment.AsignacionID}>
+                                {editAssignmentId === assignment.AsignacionID ? (
+                                    <>
+                                        <td><input type="text" name="PersonaName" value={editFormData.PersonaName} onChange={handleFormChange} /></td>
+                                        <td><input type="text" name="BeaconMac" value={editFormData.BeaconMac} onChange={handleFormChange} /></td>
+                                        <td><input type="datetime-local" name="Timestamp" value={editFormData.Timestamp} onChange={handleFormChange} /></td>
+                                        <td>
+                                            <div className='containerButton'>
+                                                <img onClick={handleSave} src='/img/save.png' alt="Guardar" />
+                                                <img onClick={handleCancel} src='/img/cancelled.png' alt="Cancelar" />
+                                            </div>
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{assignment.PersonaName}</td>
+                                        <td>{assignment.BeaconMac}</td>
+                                        <td>{formatLocalDateTime(assignment.Timestamp)}</td>
+                                        <td>
+                                            <div className='containerButton'>
+                                                <img onClick={() => handleEditClick(assignment)} src='/img/edit.png' alt="Editar" />
+                                                <img onClick={() => handleDelete(assignment.AsignacionID)} src='/img/delete.png' alt="Eliminar" />
+                                            </div>
+                                        </td>
+                                    </>
+                                )}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
             <Modal
@@ -178,44 +195,54 @@ const AssignBeaconTable = memo(() => {
                 className="modal"
                 overlayClassName="overlay"
             >
-                <h2>Filtrar Asignaciones</h2>
-                <button onClick={() => setModalIsOpen(false)}>Cerrar</button>
-                <div className="filters">
-                    <label>
-                        Persona:
-                        <input type="text" name="PersonaName" value={filters.PersonaName} onChange={handleFilterChange} />
-                    </label>
-                    <label>
-                        Beacon:
-                        <input type="text" name="BeaconMac" value={filters.BeaconMac} onChange={handleFilterChange} />
-                    </label>
-                    <label>
-                        Fecha y Hora de Asignación:
-                        <input type="text" name="Timestamp" value={filters.Timestamp} onChange={handleFilterChange} />
-                    </label>
-                    <button onClick={applyFilters}>Aplicar Filtros</button>
+                <button onClick={() => setModalIsOpen(false)} className="close-button">×</button>
+                <h2 className='tituloTabla'>Filtrar Asignaciones</h2>
+                <div className="filter-container">
+                    <input
+                        type="text"
+                        name="PersonaName"
+                        placeholder="Persona"
+                        value={filters.PersonaName}
+                        onChange={handleFilterChange}
+                        className="filter-input"
+                    />
+                    <input
+                        type="text"
+                        name="BeaconMac"
+                        placeholder="Beacon"
+                        value={filters.BeaconMac}
+                        onChange={handleFilterChange}
+                        className="filter-input"
+                    />
+                    <input
+                        type="text"
+                        name="Timestamp"
+                        placeholder="Fecha y Hora de Asignación"
+                        value={filters.Timestamp}
+                        onChange={handleFilterChange}
+                        className="filter-input"
+                    />
+                    <button onClick={applyFilters} className="filter-button">Aplicar Filtros</button>
                 </div>
-                <div className="modal-content">
-                    <table className="tabla">
-                        <thead>
-                            <tr>
-                                <th>Persona</th>
-                                <th>Beacon</th>
-                                <th>Fecha y Hora de Asignación</th>
+                <table className="tabla">
+                    <thead>
+                        <tr>
+                            <th>Persona</th>
+                            <th>Beacon</th>
+                            <th>Fecha y Hora de Asignación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {modalFilteredData.map(assignment => (
+                            <tr key={assignment.AsignacionID}>
+                                <td>{assignment.PersonaName}</td>
+                                <td>{assignment.BeaconMac}</td>
+                                <td>{formatLocalDateTime(assignment.Timestamp)}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {modalFilteredData.map(assignment => (
-                                <tr key={assignment.AsignacionID}>
-                                    <td>{assignment.PersonaName}</td>
-                                    <td>{assignment.BeaconMac}</td>
-                                    <td>{formatLocalDateTime(assignment.Timestamp)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <button onClick={handleDownload}>Descargar en Excel</button>
+                        ))}
+                    </tbody>
+                </table>
+                <button onClick={handleDownload} className="download-button">Descargar en Excel</button>
             </Modal>
         </div>
     );
