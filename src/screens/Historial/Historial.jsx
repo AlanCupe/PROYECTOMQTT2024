@@ -1,8 +1,14 @@
 import React from 'react'
+import HistorialTable from './HistorialTable'
+import HistorialProvider from '../../Context/HistorialProvider'
 
 const Historial = () => {
   return (
-    <div>Historial</div>
+    <div>
+        <HistorialProvider>
+          <HistorialTable/>
+        </HistorialProvider>
+    </div>
   )
 }
 

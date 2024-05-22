@@ -20,6 +20,9 @@ const gatewayRoutes = require('./src/routes/gatewayRoutes');
 const eventosBeaconsRoutes = require('./src/routes/eventosBeaconsRoutes');
 const areaRoutes = require('./src/routes/areaRoutes'); // Nueva ruta para áreas
 const reportsGeneralRoutes = require('./src/routes/ReportesRoutes/reportePersonalRoutes');
+const historialRoutes = require('./src/routes/historialRoutes');
+
+
 
 app.use('/mqtt', mqttRoutes);
 app.use('/personas', personRoutes);
@@ -34,7 +37,7 @@ app.use('/gateways', gatewayRoutes);
 app.use('/eventosbeacons', eventosBeaconsRoutes);
 
 app.use('/report', reportsGeneralRoutes); // Nueva ruta para reportes
-
+app.use('/historial', historialRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto http://localhost:${PORT}`);

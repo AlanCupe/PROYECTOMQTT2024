@@ -29,8 +29,6 @@ CREATE TABLE iBeacon (
     Timestamp DATETIME
 );
 
-SELECT * FROM Gateway;
-SELECT * FROM iBeacon;
 
 CREATE TABLE Personas (
     PersonaID INT PRIMARY KEY IDENTITY,
@@ -64,12 +62,6 @@ CREATE TABLE AsignacionGatewaysAreas(
     FOREIGN KEY (GatewayID) REFERENCES Gateway(GatewayID)
 );
 
-ALTER TABLE AsignacionGatewaysAreas
-ADD Timestamp DATETIME;
-
-
-
-
 CREATE TABLE AsignacionPersonasAreas (
     AsignacionID INT PRIMARY KEY IDENTITY,
     PersonaID INT,
@@ -97,67 +89,42 @@ CREATE TABLE EventosBeacons (
     FOREIGN KEY (GatewayID) REFERENCES Gateway(GatewayID)
 );
 
-drop table EventosBeacons
--- Registrar evento de entrada del iBeacon 1 en el Gateway 1
-INSERT INTO EventosBeacons (iBeaconID, GatewayID, TipoEvento, Timestamp)
-VALUES (41, 2, 'Entrada', '2024-05-08 10:05:00');
-
--- Registrar evento de salida del iBeacon 1 en el Gateway 1
-INSERT INTO EventosBeacons (iBeaconID, GatewayID, TipoEvento, Timestamp)
-VALUES (41, 2, 'Salida', '2024-05-08 10:10:00');
-
-
-
-
-INSERT INTO Personas (Nombre, Apellido, Dni, Cargo, Empresa)
-VALUES
-('Terry', 'Garcia', '77889988', 'Programador', 'Amazon'),
-('Diego', 'Aparcana', '44558866', 'Analista', 'Alibaba'),
-('Terry', 'Garcia', '77889988', 'Desarrollador', 'Petro Perú');
-
--- Insertar datos en la tabla Gateway
-INSERT INTO Gateway (MacAddress, GatewayFree, GatewayLoad, Timestamp)
-VALUES ('AC233FC18D06', 93, 0.01, '2024-05-05T18:25:55.514Z'),
-       ('AC233FC18CFB', 93, 0.01, '2024-05-05T18:25:55.514Z'),
-       ('AC233FC18CF8', 93, 0.01, '2024-05-05T18:25:55.514Z');
-
--- Insertar datos en la tabla iBeacon
-INSERT INTO iBeacon (MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery, Timestamp)
-VALUES ('C3000014B1C1', 0, '', 'E2C56DB5DFFB48D2B060D0F5A71096E0', 0, 0, -52, -59, 0, '2024-05-05T18:25:59.680Z'),
-       ('C3000014B1D4', 0, '', 'E2C56DB5DFFB48D2B060D0F5A71096E0', 0, 0, -52, -59, 0, '2024-05-05T18:25:59.341Z');
-
--- Insertar asignación de beacons a Gateway en la tabla AsignacionBeacons
-INSERT INTO AsignacionBeacons (iBeaconID, GatewayID)
-VALUES 
-(1, 1), -- Beacon 1 asignado al Gateway 1
-(2, 1), -- Beacon 2 asignado al Gateway 1
-(3, 1); -- Beacon 3 asignado al Gateway 1
-
--- Insertar áreas
-INSERT INTO Areas (Nombre) 
-VALUES 
-('Superficie'), 
-('Inicio Mina'), 
-('Comedor');
-
-INSERT INTO AsignacionGatewaysAreas (AreaID, GatewayID,Timestamp)
-VALUES
-(4, 16,'2024-05-08 10:00:00');
+CREATE TABLE historial_asignaciones (
+  HistorialID INT PRIMARY KEY IDENTITY(1,1), 
+  PersonaID INT NOT NULL,
+  iBeaconID INT NOT NULL,
+  fechaAsignacion DATETIME NOT NULL,
+  fechaBaja DATETIME,
+  FOREIGN KEY (PersonaID) REFERENCES Personas(PersonaID),
+  FOREIGN KEY (iBeaconID) REFERENCES iBeacon(iBeaconID)
+);
 
 
-INSERT INTO AsignacionPersonasBeacons (PersonaID, iBeaconID, Timestamp)
-VALUES 
-(1, 1, '2024-05-08 10:00:00'), -- Asignar iBeacon 1 a la Persona 1
-(2, 2, '2024-05-08 10:00:00'), -- Asignar iBeacon 2 a la Persona 2
-(3, 3, '2024-05-08 10:00:00'); -- Asignar iBeacon 3 a la Persona 3
+CREATE TRIGGER insertar_asignacion
+ON AsignacionPersonasBeacons
+AFTER INSERT
+AS
+BEGIN
+  INSERT INTO historial_asignaciones (PersonaID, iBeaconID, fechaAsignacion)
+  SELECT PersonaID, iBeaconID, Timestamp
+  FROM INSERTED;
+END;
 
--- Registrar la asociación de una persona con un área en un momento específico
-INSERT INTO AsignacionPersonasAreas (PersonaID, AreaID, Timestamp)
-VALUES (1, 1, '2024-05-08 10:00:00'),
-       (2, 2, '2024-05-08 10:00:00'),
-       (3, 3, '2024-05-08 10:00:00');
+CREATE TRIGGER actualizar_asignacion
+ON AsignacionPersonasBeacons
+AFTER DELETE
+AS
+BEGIN
+  UPDATE historial_asignaciones
+  SET fechaBaja = GETUTCDATE()
+  FROM historial_asignaciones
+  INNER JOIN DELETED ON historial_asignaciones.iBeaconID = DELETED.iBeaconID
+  AND historial_asignaciones.PersonaID = DELETED.PersonaID
+  AND historial_asignaciones.fechaBaja IS NULL;
+END;
 
-SELECT MacAddress FROM Gateway
+DROP TRIGGER actualizar_asignacion
+
 SELECT * FROM Personas;
 SELECT * FROM Gateway;
 SELECT * FROM iBeacon;
@@ -167,4 +134,12 @@ SELECT * FROM AsignacionGatewaysAreas;
 SELECT * FROM AsignacionPersonasAreas;
 SELECT * FROM AsignacionPersonasBeacons;
 SELECT * FROM EventosBeacons;
+SELECT * FROM Personas;
+SELECT * FROM historial_asignaciones
+
+
+DELETE FROM historial_asignaciones
 DELETE FROM AsignacionPersonasBeacons
+DELETE FROM EventosBeacons
+
+DBCC CHECKIDENT('historial_asignaciones',RESEED,0);
