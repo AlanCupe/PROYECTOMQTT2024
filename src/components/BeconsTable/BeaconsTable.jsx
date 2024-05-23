@@ -29,7 +29,8 @@ export const BeaconsTable = memo(() => {
     });
 
     useEffect(() => {
-        setFilteredData(beacons);
+        const filteredBeacons = beacons.filter(beacon => beacon.MacAddress.startsWith('C3000'));
+        setFilteredData(filteredBeacons);
     }, [beacons]);
 
     const handleEditFormChange = (event) => {
@@ -86,7 +87,8 @@ export const BeaconsTable = memo(() => {
 
     const applyFilters = () => {
         const filtered = beacons.filter(beacon => {
-            return beacon.MacAddress.toLowerCase().includes(filters.MacAddress.toLowerCase());
+            return beacon.MacAddress.toLowerCase().includes(filters.MacAddress.toLowerCase()) &&
+                   beacon.MacAddress.startsWith('C3000');
         });
         setFilteredData(filtered);
     };

@@ -1,3 +1,4 @@
+// BeaconProvider.jsx
 import React, { createContext, useState, useEffect } from 'react';
 
 export const BeaconContext = createContext();
@@ -5,7 +6,6 @@ export const BeaconContext = createContext();
 export const BeaconProvider = ({ children }) => {
     const [beacons, setBeacons] = useState([]);
     const [updateTrigger, setUpdateTrigger] = useState(false);
-   
 
     useEffect(() => {
         const fetchBeacons = async () => {
@@ -20,9 +20,6 @@ export const BeaconProvider = ({ children }) => {
         fetchBeacons();
     }, [updateTrigger]);
 
-
-
-   
     const addBeacons = (beacon) => {
         setBeacons(prevBeacons => [...prevBeacons, beacon]);
         setUpdateTrigger(prev => !prev);  // Cambiar el estado para disparar la recarga
@@ -32,9 +29,10 @@ export const BeaconProvider = ({ children }) => {
         const response = await fetch('http://localhost:3000/beacons');
         const data = await response.json();
         setBeacons(data);
-    }
+    };
+
     return (
-        <BeaconContext.Provider value={{ beacons, addBeacons, fetchBeacons}}>
+        <BeaconContext.Provider value={{ beacons, addBeacons, fetchBeacons }}>
             {children}
         </BeaconContext.Provider>
     );

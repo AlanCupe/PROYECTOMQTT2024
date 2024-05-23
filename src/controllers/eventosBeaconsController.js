@@ -30,6 +30,7 @@ exports.getAllEventos2 = async (req, res) => {
                 e.TipoEvento,
                 e.Timestamp,
                 i.MacAddress,
+                i.RSSI,  -- Incluye el RSSI aquí
                 COALESCE(p.Nombre + ' ' + p.Apellido, i.MacAddress) AS BeaconDisplayName
             FROM 
                 EventosBeacons e
@@ -43,3 +44,4 @@ exports.getAllEventos2 = async (req, res) => {
         res.status(500).send('Error al obtener los eventos de beacons');
     }
 };
+
