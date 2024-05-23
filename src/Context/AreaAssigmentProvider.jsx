@@ -1,3 +1,4 @@
+// AreaAssigmentProvider.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -48,7 +49,7 @@ export const AreaAssigmentProvider = ({ children }) => {
   };
 
   return (
-    <AreaAssigmentContext.Provider value={{ assignments, availableGateways, areas, createAssignment, updateAssignment, deleteAssignment }}>
+    <AreaAssigmentContext.Provider value={{ assignments, availableGateways, areas, createAssignment, updateAssignment, deleteAssignment, fetchAssignments }}>
       {children}
     </AreaAssigmentContext.Provider>
   );

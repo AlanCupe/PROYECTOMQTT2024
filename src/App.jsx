@@ -5,12 +5,14 @@ import { Mqttdata } from './components/Mqttdata/Mqttdata';
 import { BeaconProvider } from './Context/BeaconProvider';
 import { EventosBeaconsProvider } from './Context/EventosBeaconsProvider';
 import { GatewayProvider } from './Context/GatewayProvider';
+import { AreaAssigmentProvider } from './Context/AreaAssigmentProvider';
 
 
 function App() {
 
     return (
        <>
+       <AreaAssigmentProvider>
        <EventosBeaconsProvider>
        <BeaconProvider>
         <GatewayProvider>
@@ -24,6 +26,8 @@ function App() {
           
        </BeaconProvider>
        </EventosBeaconsProvider>
+       </AreaAssigmentProvider>
+       
       
  
        </>
