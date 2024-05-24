@@ -7,7 +7,7 @@ import "./BeaconsTable.css";
 Modal.setAppElement('#root'); // Asegúrate de que el id coincida con el id del elemento root en tu index.html
 
 export const BeaconsTable = memo(() => {
-    const { beacons, fetchBeacons } = useContext(BeaconContext);
+    const { beacons, setUpdateTrigger } = useContext(BeaconContext);
     const [editingId, setEditingId] = useState(null);
     const [editFormData, setEditFormData] = useState({
         MacAddress: '',
@@ -29,7 +29,10 @@ export const BeaconsTable = memo(() => {
     });
 
     useEffect(() => {
-        setFilteredData(beacons);
+        if (Array.isArray(beacons)) {
+            const filteredBeacons = beacons.filter(beacon => beacon && beacon.MacAddress && beacon.MacAddress.startsWith('C3000'));
+            setFilteredData(filteredBeacons);
+        }
     }, [beacons]);
 
     const handleEditFormChange = (event) => {
@@ -55,7 +58,9 @@ export const BeaconsTable = memo(() => {
         });
 
         if (response.ok) {
-            fetchBeacons();
+            setUpdateTrigger(prev => !prev);
+        } else {
+            setError('Error al eliminar el beacon.');
         }
     };
 
@@ -69,7 +74,7 @@ export const BeaconsTable = memo(() => {
         });
 
         if (response.ok) {
-            fetchBeacons();
+            setUpdateTrigger(prev => !prev);
             setEditingId(null);
         } else {
             setError('Error al guardar los cambios.');
@@ -86,7 +91,8 @@ export const BeaconsTable = memo(() => {
 
     const applyFilters = () => {
         const filtered = beacons.filter(beacon => {
-            return beacon.MacAddress.toLowerCase().includes(filters.MacAddress.toLowerCase());
+            return beacon && beacon.MacAddress.toLowerCase().includes(filters.MacAddress.toLowerCase()) &&
+                   beacon.MacAddress.startsWith('C3000');
         });
         setFilteredData(filtered);
     };
@@ -97,6 +103,10 @@ export const BeaconsTable = memo(() => {
         XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Beacons");
         XLSX.writeFile(workbook, "filtered_beacons.xlsx");
     };
+
+    if (error) {
+        return <div className="error">{error}</div>;
+    }
 
     return (
         <div>

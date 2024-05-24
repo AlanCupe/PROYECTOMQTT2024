@@ -6,10 +6,7 @@ const ProjectTable = ({ data }) => {
         console.log("Datos desde DASHBOARD A PROJECT TABLE:", data);
     }, [data]);
 
-    // Filtra los datos para mostrar solo los beacons cuya dirección MAC comienza con 'C30000'
-    const filteredData = data.filter(evento => evento.MacAddress.startsWith('C30000'));
-
-    if (!filteredData || filteredData.length === 0) {
+    if (!data || data.length === 0) {
         return <div>No hay datos para mostrar.</div>;
     }
 
@@ -21,15 +18,21 @@ const ProjectTable = ({ data }) => {
                     <th>Tipo de Evento</th>
                     <th>RSSI</th>
                     <th>Timestamp</th>
+                   
+                    <th>Nombre y Apellido</th>
+                    
                 </tr>
             </thead>
             <tbody>
-                {filteredData.map(evento => (
-                    <tr key={evento.EventoID}>
-                        <td>{evento.BeaconDisplayName}</td>
+                {data.map(evento => (
+                    <tr key={evento.iBeaconID}>
+                        <td>{evento.BeaconMacAddress}</td>
                         <td>{evento.TipoEvento}</td>
-                        <td></td>
+                        <td>{evento.Rssi}</td>
                         <td>{new Date(evento.Timestamp).toLocaleString()}</td>
+                       
+                        <td>{evento.PersonaNombre} {evento.PersonaApellido}</td>
+                        
                     </tr>
                 ))}
             </tbody>

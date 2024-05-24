@@ -14,7 +14,7 @@ export const Mqttdata = () => {
             console.log('Cliente MQTT conectado');
             client.subscribe('/gw/ac233fc18d06/status');
             client.subscribe('/gw/ac233fc18cfb/status');
-            client.subscribe('/gw/ac233fc18d08/status'); // Agrega tu tercera suscripción aquí
+            client.subscribe('/gw/ac233fc18d08/status');
         });
 
         client.on('message', (topic, message) => {
@@ -31,7 +31,6 @@ export const Mqttdata = () => {
     }, []);
 
     const saveDataToServer = async (topic, data) => {
-        console.log('Datos que se enviarán al servidor:', { topic, message: data });
         try {
             const response = await fetch('http://localhost:3000/mqtt/message', {
                 method: 'POST',
@@ -56,5 +55,5 @@ export const Mqttdata = () => {
         }
     };
 
-    return null; // Este componente no necesita renderizar nada
+    return null;
 };
