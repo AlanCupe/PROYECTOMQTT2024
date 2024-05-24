@@ -9,8 +9,8 @@ dbConnection.connect()
         console.error('Error al conectar con la base de datos:', err);
     });
 
-    const RSSI_THRESHOLD = -100;
-    const CHECK_INTERVAL = 17000;
+    const RSSI_THRESHOLD = -70;
+    const CHECK_INTERVAL = 10000;
     
     const handleMQTTMessage = async (req, res) => {
         const { topic, message } = req.body;
