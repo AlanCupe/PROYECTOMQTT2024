@@ -1,9 +1,9 @@
-import React, { memo, useContext, useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { BeaconContext } from '../../Context/BeaconProvider';
 import "./BeaconsForm.css";
 import Swal from 'sweetalert2';
 
-export const BeaconsForm = memo(() => {
+export const BeaconsForm = () => {
     const [formData, setFormData] = useState({
         MacAddress: '',
         BleNo: '',
@@ -17,7 +17,7 @@ export const BeaconsForm = memo(() => {
     });
     const [error, setError] = useState('');
 
-    const { addBeacons, beacons } = useContext(BeaconContext); // Mueve useContext al nivel superior
+    const { addBeacon, beacons, setUpdateTrigger } = useContext(BeaconContext);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -54,10 +54,18 @@ export const BeaconsForm = memo(() => {
             }
             return response.json();
         }).then(data => {
-            addBeacons(data);
+            addBeacon(data);
+            setUpdateTrigger(prev => !prev);
             setFormData({
                 MacAddress: '',
-                // reset otros campos
+                BleNo: '',
+                BleName: '',
+                iBeaconUuid: '',
+                iBeaconMajor: '',
+                iBeaconMinor: '',
+                Rssi: '',
+                iBeaconTxPower: '',
+                Battery: ''
             });
             Swal.fire('¡Éxito!', 'Beacon creado correctamente', 'success');
             setError('');
@@ -67,21 +75,13 @@ export const BeaconsForm = memo(() => {
         });
     };
 
-    useEffect(() => {
-        if (error) {
-            Swal.fire('Error', error, 'error');
-        }
-    }, [error]);
-
     return (
-        <form onSubmit={handleSubmit}  className='form-beacon'>
+        <form onSubmit={handleSubmit} className='form-beacon'>
             <h2 className='titleRegister'>REGISTRAR NUEVO BEACON</h2>
-           <div className="form-input">
-           <input type="text" name="MacAddress" value={formData.MacAddress} onChange={handleChange} required placeholder='MAC Address' />
-            <button type="submit">Crear Beacon</button>
-           </div>
+            <div className="form-input">
+                <input type="text" name="MacAddress" value={formData.MacAddress} onChange={handleChange} required placeholder='MAC Address' />
+                <button type="submit">Crear Beacon</button>
+            </div>
         </form>
     );
-});
-
-export default BeaconsForm;
+};

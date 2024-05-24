@@ -15,6 +15,7 @@ exports.getBeacons = async (req, res) => {
 
 };
 
+
 exports.createBeacon = async (req, res) => {
     const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery } = req.body;
     try {
@@ -30,13 +31,14 @@ exports.createBeacon = async (req, res) => {
             .input('iBeaconTxPower', sql.Int, iBeaconTxPower)
             .input('Battery', sql.Int, Battery)
             .query('INSERT INTO iBeacon (MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery) VALUES (@MacAddress, @BleNo, @BleName, @iBeaconUuid, @iBeaconMajor, @iBeaconMinor, @Rssi, @iBeaconTxPower, @Battery)');
-        
+
         res.status(201).send({ message: "Beacon registered successfully!" });
     } catch (error) {
         console.error('Database error:', error);
         res.status(500).send('Error registering new beacon');
     }
 };
+
 
 // Función para actualizar un beacon
 exports.updateBeacon = async (req, res) => {
