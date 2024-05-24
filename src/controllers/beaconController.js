@@ -5,19 +5,43 @@ const dbConnection = require('../config/dbconfig');
 exports.getBeacons = async (req, res) => {
     try {
         const pool = await dbConnection.connect();
-        const result = await pool.request().query('SELECT * FROM iBeacon');
+        const result = await pool.request().query(`
+            SELECT 
+                ib.iBeaconID,
+                ib.MacAddress,
+                ib.BleNo,
+                ib.BleName,
+                ib.iBeaconUuid,
+                ib.iBeaconMajor,
+                ib.iBeaconMinor,
+                ib.Rssi,
+                ib.iBeaconTxPower,
+                ib.Battery,
+                ib.Timestamp,
+                ib.GatewayID,
+                gw.MacAddress AS GatewayMacAddress
+            FROM 
+                iBeacon ib
+            INNER JOIN 
+                Gateway gw ON ib.GatewayID = gw.GatewayID
+            WHERE 
+                ib.Timestamp = (
+                    SELECT MAX(Timestamp) 
+                    FROM iBeacon 
+                    WHERE MacAddress = ib.MacAddress
+                )
+            ORDER BY 
+                ib.MacAddress, ib.GatewayID;
+        `);
         res.json(result.recordset);
     } catch (error) {
         console.error('Database error:', error);
         res.status(500).send('Error al obtener datos de beacons');
     }
-
-
 };
 
-
 exports.createBeacon = async (req, res) => {
-    const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery } = req.body;
+    const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery, GatewayID } = req.body;
     try {
         const pool = await dbConnection.connect();
         const result = await pool.request()
@@ -30,7 +54,8 @@ exports.createBeacon = async (req, res) => {
             .input('Rssi', sql.Int, Rssi)
             .input('iBeaconTxPower', sql.Int, iBeaconTxPower)
             .input('Battery', sql.Int, Battery)
-            .query('INSERT INTO iBeacon (MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery) VALUES (@MacAddress, @BleNo, @BleName, @iBeaconUuid, @iBeaconMajor, @iBeaconMinor, @Rssi, @iBeaconTxPower, @Battery)');
+            .input('GatewayID', sql.Int, GatewayID)
+            .query('INSERT INTO iBeacon (MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery, GatewayID) VALUES (@MacAddress, @BleNo, @BleName, @iBeaconUuid, @iBeaconMajor, @iBeaconMinor, @Rssi, @iBeaconTxPower, @Battery, @GatewayID)');
 
         res.status(201).send({ message: "Beacon registered successfully!" });
     } catch (error) {
@@ -39,11 +64,9 @@ exports.createBeacon = async (req, res) => {
     }
 };
 
-
-// Función para actualizar un beacon
 exports.updateBeacon = async (req, res) => {
     const { id } = req.params;
-    const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery } = req.body;
+    const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery, GatewayID } = req.body;
     try {
         const pool = await dbConnection.connect();
         const result = await pool.request()
@@ -57,7 +80,8 @@ exports.updateBeacon = async (req, res) => {
             .input('Rssi', sql.Int, Rssi)
             .input('iBeaconTxPower', sql.Int, iBeaconTxPower)
             .input('Battery', sql.Int, Battery)
-            .query('UPDATE iBeacon SET MacAddress = @MacAddress, BleNo = @BleNo, BleName = @BleName, iBeaconUuid = @iBeaconUuid, iBeaconMajor = @iBeaconMajor, iBeaconMinor = @iBeaconMinor, Rssi = @Rssi, iBeaconTxPower = @iBeaconTxPower, Battery = @Battery WHERE iBeaconID = @iBeaconID');
+            .input('GatewayID', sql.Int, GatewayID)
+            .query('UPDATE iBeacon SET MacAddress = @MacAddress, BleNo = @BleNo, BleName = @BleName, iBeaconUuid = @iBeaconUuid, iBeaconMajor = @iBeaconMajor, iBeaconMinor = @iBeaconMinor, Rssi = @Rssi, iBeaconTxPower = @iBeaconTxPower, Battery = @Battery, GatewayID = @GatewayID WHERE iBeaconID = @iBeaconID');
 
         if (result.rowsAffected[0] > 0) {
             res.status(200).send({ message: 'Beacon updated successfully!' });
@@ -70,7 +94,6 @@ exports.updateBeacon = async (req, res) => {
     }
 };
 
-// Función para eliminar un beacon
 exports.deleteBeacon = async (req, res) => {
     const { id } = req.params;
     try {

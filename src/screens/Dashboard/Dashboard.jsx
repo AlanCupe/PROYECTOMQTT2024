@@ -33,9 +33,9 @@ export const Dashboard = () => {
     const getUniqueBeaconsByGateway = (gatewayID) => {
         const beacons = eventosBeacons.filter(evento => evento.GatewayID === gatewayID);
         const latestEvents = beacons.reduce((acc, current) => {
-            const existing = acc[current.MacAddress];
+            const existing = acc[current.BeaconMacAddress];
             if (!existing || new Date(existing.Timestamp) < new Date(current.Timestamp)) {
-                acc[current.MacAddress] = current;
+                acc[current.BeaconMacAddress] = current;
             }
             return acc;
         }, {});

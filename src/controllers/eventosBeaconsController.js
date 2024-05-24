@@ -24,20 +24,48 @@ exports.getAllEventos2 = async (req, res) => {
     try {
         const pool = await dbConnection.connect();
         const result = await pool.request().query(`
-            SELECT 
-                e.EventoID,
-                e.GatewayID,
-                e.TipoEvento,
-                e.Timestamp,
-                i.MacAddress,
-                i.RSSI,  -- Incluye el RSSI aquí
-                COALESCE(p.Nombre + ' ' + p.Apellido, i.MacAddress) AS BeaconDisplayName
-            FROM 
-                EventosBeacons e
-                JOIN iBeacon i ON e.iBeaconID = i.iBeaconID
-                LEFT JOIN AsignacionPersonasBeacons apb ON e.iBeaconID = apb.iBeaconID
-                LEFT JOIN Personas p ON apb.PersonaID = p.PersonaID
-        `);
+        SELECT 
+        eb.iBeaconID,
+        ib.MacAddress AS BeaconMacAddress,
+        ib.Rssi,
+        eb.Timestamp,
+        eb.GatewayID,
+        gw.MacAddress AS GatewayMacAddress,
+        eb.TipoEvento,
+        ISNULL(pa.Nombre, 'No asignado') AS PersonaNombre,
+        ISNULL(pa.Apellido, 'No asignado') AS PersonaApellido
+      FROM 
+        EventosBeacons eb
+      INNER JOIN 
+        (SELECT iBeaconID, GatewayID, MAX(Timestamp) AS MaxTimestamp
+         FROM EventosBeacons
+         GROUP BY iBeaconID, GatewayID) AS latest
+      ON 
+        eb.iBeaconID = latest.iBeaconID AND eb.GatewayID = latest.GatewayID AND eb.Timestamp = latest.MaxTimestamp
+      INNER JOIN 
+        iBeacon ib ON eb.iBeaconID = ib.iBeaconID
+      INNER JOIN 
+        Gateway gw ON eb.GatewayID = gw.GatewayID
+      LEFT JOIN 
+        (SELECT 
+           ab.MacAddress,
+           p.Nombre,
+           p.Apellido
+         FROM 
+           AsignacionPersonasBeacons apb
+         INNER JOIN 
+           iBeacon ab ON apb.iBeaconID = ab.iBeaconID
+         INNER JOIN 
+           Personas p ON apb.PersonaID = p.PersonaID) AS pa
+      ON 
+        ib.MacAddress = pa.MacAddress
+      ORDER BY 
+        eb.GatewayID, eb.iBeaconID;
+
+
+
+
+`);
         res.json(result.recordset);
     } catch (error) {
         console.error('Database error:', error);
