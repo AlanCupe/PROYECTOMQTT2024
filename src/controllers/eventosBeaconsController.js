@@ -32,8 +32,10 @@ exports.getAllEventos2 = async (req, res) => {
         eb.GatewayID,
         gw.MacAddress AS GatewayMacAddress,
         eb.TipoEvento,
-        ISNULL(pa.Nombre, 'No asignado') AS PersonaNombre,
-        ISNULL(pa.Apellido, 'No asignado') AS PersonaApellido
+        CASE 
+          WHEN pa.Nombre IS NULL AND pa.Apellido IS NULL THEN 'No asignado'
+          ELSE ISNULL(pa.Nombre, '') + ' ' + ISNULL(pa.Apellido, '') 
+        END AS PersonaNombreApellido
       FROM 
         EventosBeacons eb
       INNER JOIN 
@@ -61,9 +63,7 @@ exports.getAllEventos2 = async (req, res) => {
         ib.MacAddress = pa.MacAddress
       ORDER BY 
         eb.GatewayID, eb.iBeaconID;
-
-
-
+      
 
 `);
         res.json(result.recordset);

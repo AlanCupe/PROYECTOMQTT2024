@@ -30,8 +30,7 @@ export const BeaconsTable = memo(() => {
 
     useEffect(() => {
         if (Array.isArray(beacons)) {
-            const filteredBeacons = beacons.filter(beacon => beacon && beacon.MacAddress && beacon.MacAddress.startsWith('C3000'));
-            setFilteredData(filteredBeacons);
+            setFilteredData(beacons.filter(beacon => beacon && beacon.MacAddress && beacon.MacAddress.startsWith('C3000')));
         }
     }, [beacons]);
 
@@ -53,17 +52,22 @@ export const BeaconsTable = memo(() => {
     };
 
     const handleDelete = async (id) => {
-        const response = await fetch(`http://localhost:3000/beacons/${id}`, {
-            method: 'DELETE',
-        });
-
-        if (response.ok) {
-            setUpdateTrigger(prev => !prev);
-        } else {
+        try {
+            const response = await fetch(`http://localhost:3000/beacons/${id}`, {
+                method: 'DELETE',
+            });
+    
+            if (response.ok) {
+                setUpdateTrigger(prev => !prev);
+            } else {
+                setError('Error al eliminar el beacon.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar el beacon:', error);
             setError('Error al eliminar el beacon.');
         }
     };
-
+    
     const handleSaveClick = async (id) => {
         const response = await fetch(`http://localhost:3000/beacons/${id}`, {
             method: 'PUT',

@@ -15,11 +15,12 @@ export const Mqttdata = () => {
             client.subscribe('/gw/ac233fc18d06/status');
             client.subscribe('/gw/ac233fc18cfb/status');
             client.subscribe('/gw/ac233fc18d08/status');
+            client.subscribe('/gw/ac233fc18cff/status'); // Nuevo gateway
         });
 
         client.on('message', (topic, message) => {
             const parsedMessage = JSON.parse(message.toString());
-            if (topic === '/gw/ac233fc18d06/status' || topic === '/gw/ac233fc18cfb/status' || topic === '/gw/ac233fc18d08/status') {
+            if (topic === '/gw/ac233fc18d06/status' || topic === '/gw/ac233fc18cfb/status' || topic === '/gw/ac233fc18d08/status' || topic === '/gw/ac233fc18cff/status') {
                 saveDataToServer(topic, parsedMessage);
             }
         });

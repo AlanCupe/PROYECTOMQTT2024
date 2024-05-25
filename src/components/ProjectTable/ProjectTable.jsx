@@ -18,9 +18,7 @@ const ProjectTable = ({ data }) => {
                     <th>Tipo de Evento</th>
                     <th>RSSI</th>
                     <th>Timestamp</th>
-                   
                     <th>Nombre y Apellido</th>
-                    
                 </tr>
             </thead>
             <tbody>
@@ -30,9 +28,7 @@ const ProjectTable = ({ data }) => {
                         <td>{evento.TipoEvento}</td>
                         <td>{evento.Rssi}</td>
                         <td>{new Date(evento.Timestamp).toLocaleString()}</td>
-                       
-                        <td>{evento.PersonaNombre} {evento.PersonaApellido}</td>
-                        
+                        <td>{evento.PersonaNombreApellido?`${evento.PersonaNombreApellido}`:"No asignado"}</td>
                     </tr>
                 ))}
             </tbody>
