@@ -40,6 +40,8 @@ exports.getBeacons = async (req, res) => {
     }
 };
 
+
+
 exports.createBeacon = async (req, res) => {
     const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery, GatewayID } = req.body;
     try {
@@ -64,6 +66,9 @@ exports.createBeacon = async (req, res) => {
     }
 };
 
+
+
+// Función para actualizar un beacon
 exports.updateBeacon = async (req, res) => {
     const { id } = req.params;
     const { MacAddress, BleNo, BleName, iBeaconUuid, iBeaconMajor, iBeaconMinor, Rssi, iBeaconTxPower, Battery, GatewayID } = req.body;
@@ -94,6 +99,8 @@ exports.updateBeacon = async (req, res) => {
     }
 };
 
+
+// Función para eliminar un beacon
 exports.deleteBeacon = async (req, res) => {
     const { id } = req.params;
     try {
@@ -112,3 +119,4 @@ exports.deleteBeacon = async (req, res) => {
         res.status(500).send('Error deleting beacon');
     }
 };
+
