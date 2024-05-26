@@ -14,7 +14,11 @@ export const GatewayProvider = ({ children }) => {
         const fetchGateways = async () => {
             const response = await axios.get('http://localhost:3000/gatewayregister');
             const gatewaysWithStatus = response.data.map(gateway => {
+                
                 const isOnline = new Date() - new Date(gateway.LastHeartbeat) < 10000; // 1 minuto
+
+
+                
                 return { ...gateway, isOnline };
             });
             setGateways(gatewaysWithStatus);
