@@ -62,11 +62,15 @@ export const Dashboard = () => {
                             <h2 className='flexRow containerData'>
                                 <img className='imgRouter' src="/img/gateway.png" alt="gateway" />
                                 <span>{gateway.MacAddress}</span>
+                                <span>{gateway.isOnline ? <div className='letEnable'></div> : <div className='letDisable'></div>}</span>
                             </h2>
                             <h3>{gateway.areaNombre}</h3>
                             <p className='flexRow imgP'>
                                 <img src="/img/user.png" alt="usuarioDetectados" />
                                 <span>{totalEvents.length}</span>
+                            </p>
+                            <p className='flexRow imgP'>
+                               
                             </p>
                         </div>
                         <div className='table-container'>

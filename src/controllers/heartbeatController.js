@@ -2,7 +2,7 @@ const sql = require('mssql');
 const dbConnection = require('../config/dbconfig');
 
 exports.Datosheartbeat = async (req, res) => {
-  const { macAddress } = req.body;
+    const { macAddress } = req.body;
     const now = new Date();
 
     try {

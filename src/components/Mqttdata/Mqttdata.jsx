@@ -20,7 +20,8 @@ export const Mqttdata = () => {
 
         client.on('message', (topic, message) => {
             const parsedMessage = JSON.parse(message.toString());
-            if (topic === '/gw/ac233fc18d06/status' || topic === '/gw/ac233fc18cfb/status' || topic === '/gw/ac233fc18d08/status' || topic === '/gw/ac233fc18cff/status') {
+            if (topic.startsWith('/gw/')) {
+                console.log(`Mensaje recibido en el tópico ${topic}:`, parsedMessage);
                 saveDataToServer(topic, parsedMessage);
             }
         });
