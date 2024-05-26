@@ -22,10 +22,10 @@ const handleMQTTMessage = async (req, res) => {
     try {
         const parsedMessage = JSON.parse(message);
         const detectedBeacons = new Set();
+        console.log(`Mensaje MQTT recibido para el gateway ${gatewayMac}:`, parsedMessage);
 
         for (const item of parsedMessage) {
             if (item.type === 'Gateway') {
-                // Proceso para los datos del Gateway
                 const gatewayData = {
                     MacAddress: item.mac,
                     GatewayFree: item.gatewayFree,
@@ -35,13 +35,13 @@ const handleMQTTMessage = async (req, res) => {
 
                 const gatewayQuery = `IF NOT EXISTS (SELECT 1 FROM Gateway WHERE MacAddress = @MacAddress)
                                       BEGIN
-                                          INSERT INTO Gateway (MacAddress, GatewayFree, GatewayLoad, Timestamp) 
-                                          VALUES (@MacAddress, @GatewayFree, @GatewayLoad, @Timestamp)
+                                          INSERT INTO Gateway (MacAddress, GatewayFree, GatewayLoad, Timestamp, LastHeartbeat) 
+                                          VALUES (@MacAddress, @GatewayFree, @GatewayLoad, @Timestamp, @LastHeartbeat)
                                       END
                                       ELSE
                                       BEGIN
                                           UPDATE Gateway 
-                                          SET GatewayFree = @GatewayFree, GatewayLoad = @GatewayLoad, Timestamp = @Timestamp 
+                                          SET GatewayFree = @GatewayFree, GatewayLoad = @GatewayLoad, Timestamp = @Timestamp, LastHeartbeat = @LastHeartbeat
                                           WHERE MacAddress = @MacAddress
                                       END`;
 
@@ -50,6 +50,7 @@ const handleMQTTMessage = async (req, res) => {
                     .input('GatewayFree', sql.Int, gatewayData.GatewayFree)
                     .input('GatewayLoad', sql.Float, gatewayData.GatewayLoad)
                     .input('Timestamp', sql.DateTime, gatewayData.Timestamp)
+                    .input('LastHeartbeat', sql.DateTime, now)
                     .query(gatewayQuery);
 
             } else if (item.type === 'iBeacon' && item.mac.startsWith('C30000')) {
@@ -190,3 +191,4 @@ const handleMQTTMessage = async (req, res) => {
 };
 
 module.exports = { handleMQTTMessage };
+

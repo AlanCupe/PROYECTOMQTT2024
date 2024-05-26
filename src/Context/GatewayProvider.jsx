@@ -11,22 +11,25 @@ export const GatewayProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchAllData = async () => {
-            try {
-                await Promise.all([fetchGateways(), fetchAreas(), fetchAsignaciones()]);
-                setLoading(false);
-            } catch (err) {
-                setError(err.message);
-                setLoading(false);
-            }
-        };
-        fetchAllData();
-    }, []);
+        const fetchGateways = async () => {
+            const response = await axios.get('http://localhost:3000/gatewayregister');
+            const gatewaysWithStatus = response.data.map(gateway => {
+                
+                const isOnline = new Date() - new Date(gateway.LastHeartbeat) < 10000; // 1 minuto
 
-    const fetchGateways = async () => {
-        const response = await axios.get('http://localhost:3000/gatewayregister');
-        setGateways(response.data);
-    };
+
+                
+                return { ...gateway, isOnline };
+            });
+            setGateways(gatewaysWithStatus);
+        };
+
+        fetchGateways(); // Fetch initially
+
+        const interval = setInterval(fetchGateways, 1000); // Poll every 10 seconds
+
+        return () => clearInterval(interval); // Cleanup on unmount
+    }, []);
 
     const fetchAreas = async () => {
         const response = await axios.get('http://localhost:3000/areas');

@@ -66,3 +66,27 @@
             width: 15px;
         }
     }
+
+    @keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.2;
+        }
+    }
+
+    .letEnable, .letDisable{
+        display: block;
+        padding: 10px;
+        border-radius: 20px;
+       
+    }
+    .letEnable {
+        background-color: rgb(18, 241, 18);
+        animation: blink 1s infinite;
+    }
+    .letDisable{
+        background-color: rgb(119, 119, 119);
+    }
+    
